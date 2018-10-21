@@ -17,7 +17,7 @@ using namespace std;
 client::client(int port, string IpAdr) {
     this->port = port;
 
-    cout << "Testing client constructor" << endl; 
+    cout << "Establishing Client..." << endl; 
 
     socketNum = socket(AF_INET, SOCK_STREAM, 0);
 
@@ -45,7 +45,26 @@ client::~client () {
             cout << "Socket closed" << endl;
     }
 }
+int client::communicate() {
+    string outLine;
+    cin >> outLine;
+    string tempStr = "Alpha Tango! Do you read?";
+    int length = tempStr.length() + 1;
 
+    if(outLine == "SEND") {
+        if(send(socketNum, tempStr.c_str(), length, 0) == -1) {
+            cerr << "ERROR: Failed to SEND message" << endl;
+            return 2;
+        }
+        else {
+            cout << "Message sent" << endl;
+            return 0;
+        }
+    }
+    else if(outLine == "QUIT") {
+        return 1;
+    }
+}
 
 
 

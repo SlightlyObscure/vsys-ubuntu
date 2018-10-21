@@ -14,7 +14,7 @@ using namespace std;
 mailServer::mailServer(int port) {
     this->port = port;
 
-    cout << "Testing server constructor" << endl; 
+    cout << "Constructing server..." << endl; 
 
     socketNum = socket(AF_INET, SOCK_STREAM, 0);
 
@@ -26,6 +26,9 @@ mailServer::mailServer(int port) {
     if(bind(socketNum, (struct sockaddr *) &address, sizeof (address))!=0){
         cerr << "ERROR: Unable to bind socket. Error #" << errno << endl;
         exit(1);
+    }
+    else {
+        cout << "Server successfully bound to socket" << endl; 
     }
 
     listen(socketNum, 7);
