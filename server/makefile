@@ -1,6 +1,6 @@
 all: server
 
-server: server.cpp
+server: server.cpp main.cpp
 	g++ -o server server.cpp server.h main.cpp
 
 clean:

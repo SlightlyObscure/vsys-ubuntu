@@ -7,29 +7,35 @@
 #include <unistd.h> //read(), write(), close()
 #include <errno.h> //global var errno
 
-
 #include "server.h"
 
 using namespace std;
 
-mailServer::mailServer() {
-    struct sockaddr_in address;
+mailServer::mailServer(int port) {
+    this->port = port;
+
     cout << "Testing server constructor" << endl; 
+
     socketNum = socket(AF_INET, SOCK_STREAM, 0);
-    cout << "socketNum = " << socketNum << endl;
-    memset(&address, 0, sizeof(address));
+
+    memset(&address, 0, sizeof(address)); //Sicherstellen dass Adresse 0 ist
     address.sin_family = AF_INET; //IPv4
-    address.sin_port = htons(6000); //Port nummer 6000
+    address.sin_port = htons(port); //Port nummer <port>
     address.sin_addr.s_addr = htonl (INADDR_ANY); //eigene IP Adresse
+
     if(bind(socketNum, (struct sockaddr *) &address, sizeof (address))!=0){
-        cerr << "Unable to bind socket." << endl;
+        cerr << "ERROR: Unable to bind socket. Error #" << errno << endl;
         exit(1);
     }
+
+    listen(socketNum, 7);
 }
 
 mailServer::~mailServer() {
-    if(socketNum>0) {
-        close(socketNum);
-        cout << "Socket closed" << endl;
+    if(close(socketNum) == -1) {
+        cerr << "ERROR: Unable to close socket. Error #" << errno << endl;
+    }
+    else {
+            cout << "Socket closed" << endl;
     }
 }
