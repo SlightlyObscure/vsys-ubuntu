@@ -9,8 +9,10 @@ private:
     int socketNum;
     struct sockaddr_in address;
     int port;
+    socklen_t socketLength;
 
 public:
     mailServer(int port);
     ~mailServer();
+    bool acceptance();
 };

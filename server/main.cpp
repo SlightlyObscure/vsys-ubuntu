@@ -41,31 +41,42 @@ int main(int argc, char* argv[]) {
 
     mailServer* serf = new mailServer (port);
 
-    pid_t prosID; //process ID
+    pid_t procID; //process ID
 
-    /*
+    
     //Prefork so that up to CLIENT_CAP clients can use the server at once 
-    for (int i = 0; i < CLIENT_CAP; i++) {
-        prosID = fork();
-        if(prosID == -1) {  //failed to fork
+    /*for (int i = 0; i < CLIENT_CAP; i++) {
+        procID = fork();
+        if(procID == -1) {  //failed to fork
             exit(1);
         }
-        else if(prosID == 0) { //this is a child process -> stop forking
+        else if(procID == 0) { //this is a child process -> stop forking
             break;
         }
         else {
-            cout << "Is it someone new? Process ID: " << prosID << endl;
+            cout << "Is it someone new? Process ID: " << procID << endl;
         }
     }
-    if(prosID == 0) { //child process
-        
+    if(procID == 0) { //child process
+        while(serf->acceptance()) {
+
+        }
     }
     else {
         string fakeNews; //temporary replacement for waitpid
         cin >> fakeNews;
+        delete serf;
     }*/
-
+    while(serf->acceptance()) {
+        string fakeNews; //temporary replacement for waitpid
+        cin >> fakeNews;
+        if(fakeNews == ""){
+            break;
+        }    
+    }
     
 
     delete serf;
+
+    return 0;
 }

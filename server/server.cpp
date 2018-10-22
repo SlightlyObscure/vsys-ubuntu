@@ -42,3 +42,17 @@ mailServer::~mailServer() {
             cout << "Socket closed" << endl;
     }
 }
+
+bool mailServer::acceptance() { 
+    socketLength = sizeof(address);
+    int accSockNum = accept(socketNum, (struct sockaddr *) &address, &socketLength);
+    if(accSockNum > 0) {
+        cout << "Client accepted with socket descriptor: " << accSockNum << endl;
+        
+    }
+    else {
+        cerr << "Client cast out (failed to accept client)" << endl;
+        
+    }
+    return 0;
+}
