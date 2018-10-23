@@ -13,6 +13,7 @@ private:
     struct sockaddr_in address;
     int port;
     socklen_t socketLength;
+    int clientSocket;
 
 public:
     mailServer(int port);

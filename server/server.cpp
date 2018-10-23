@@ -49,6 +49,7 @@ bool mailServer::acceptance() {                                      //TO DO: ma
     int accSockNum = accept(socketNum, (struct sockaddr *) &address, &socketLength);
     if(accSockNum > 0) {
         cout << "Client accepted with socket descriptor: " << accSockNum << endl;
+        clientSocket = accSockNum;
     }
     else {
         cerr << "Client cast out (failed to accept client)" << endl;
@@ -61,7 +62,7 @@ string mailServer::receiveMess() {
     int buffLen = 100;       //TO DO: change this
     char mess[buffLen] = "";
     int len = 0;
-    len = recv(socketNum, mess, buffLen-1, 0);
+    len = recv(clientSocket, mess, buffLen-1, 0);
     if(len == -1) {
         //cerr << "ERROR: Failed to receive message" << endl;
     }
