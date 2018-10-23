@@ -68,3 +68,19 @@ int client::communicate() {
 
 
 
+/*                                                     //TO DO: implement this wrapper for larger messages
+int sendall(int sd, char *buf, int *len) {
+    int total = 0; // how many bytes we’ve sent
+    int bytesleft = *len; // how many we have left to send
+    int n;
+    while(total < *len) {
+        Bachelor Informatik - Verteilte Systeme 24
+        n = send(sd, buf+total, bytesleft, 0);
+        if (n == -1) { break; }
+        total += n;
+        bytesleft -= n;
+    }
+    *len = total; // return number actually sent here
+    return n==-1?-1:0; // return -1 on failure, 0 on success
+}
+*/

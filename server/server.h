@@ -15,4 +15,5 @@ public:
     mailServer(int port);
     ~mailServer();
     bool acceptance();
+    bool receive();
 };

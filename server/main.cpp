@@ -67,14 +67,20 @@ int main(int argc, char* argv[]) {
         cin >> fakeNews;
         delete serf;
     }*/
-    while(serf->acceptance()) {
-        string fakeNews; //temporary replacement for waitpid
-        cin >> fakeNews;
-        if(fakeNews == ""){
+    string fakeNews = "";
+    bool gotLiege = false;
+
+    while(1) {
+        if(!gotLiege) {
+            serf->acceptance();
+            gotLiege = true;
+        }
+        serf->receiveMess();
+        /*cin >> fakeNews;
+        if(fakeNews == "quit"){
             break;
-        }    
+        } */   
     }
-    
 
     delete serf;
 

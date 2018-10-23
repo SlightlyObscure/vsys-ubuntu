@@ -43,16 +43,40 @@ mailServer::~mailServer() {
     }
 }
 
-bool mailServer::acceptance() { 
+bool mailServer::acceptance() {                                      //TO DO: maybe different returns
     socketLength = sizeof(address);
     int accSockNum = accept(socketNum, (struct sockaddr *) &address, &socketLength);
     if(accSockNum > 0) {
         cout << "Client accepted with socket descriptor: " << accSockNum << endl;
-        
     }
     else {
         cerr << "Client cast out (failed to accept client)" << endl;
         
     }
     return 0;
+}
+
+string mailServer::receiveMess() { 
+    /*int buffLen = 100;       //TO DO: change this
+    char string[buffLen];
+    int len = 0;
+    len = recv(socketNum, string, buffLen-1, 0);
+    if(len == -1) {
+        //cerr << "ERROR: Failed to receive message" << endl;
+    }
+    else {
+        string[len] = '\0';
+        cout << "Message received: " << string << endl; 
+    }
+    return 0;*/
+
+
+    /*size = readline (my_socket, buffer, BUF - 1);  //TO DO: work on this
+
+	if (size > 0)
+	{
+		buffer[size] = '\0';
+
+		return std::string(buffer);
+	}*/
 }
