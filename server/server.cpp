@@ -1,6 +1,7 @@
 #include <iostream>
 #include <stdio.h>
 #include <string.h>
+#include <string>
 #include <sys/socket.h> //socket(), bind()
 #include <netinet/in.h> //struct sockaddr_in (see vsys_teil2 page 11)
 #include <arpa/inet.h> // inet_ntoa()
@@ -57,18 +58,19 @@ bool mailServer::acceptance() {                                      //TO DO: ma
 }
 
 string mailServer::receiveMess() { 
-    /*int buffLen = 100;       //TO DO: change this
-    char string[buffLen];
+    int buffLen = 100;       //TO DO: change this
+    char mess[buffLen] = "";
     int len = 0;
-    len = recv(socketNum, string, buffLen-1, 0);
+    len = recv(socketNum, mess, buffLen-1, 0);
     if(len == -1) {
         //cerr << "ERROR: Failed to receive message" << endl;
     }
     else {
-        string[len] = '\0';
-        cout << "Message received: " << string << endl; 
+        mess[len] = '\0';
+        cout << "Message received: " << mess << endl; 
     }
-    return 0;*/
+    string toStr(mess);
+    return toStr;
 
 
     /*size = readline (my_socket, buffer, BUF - 1);  //TO DO: work on this

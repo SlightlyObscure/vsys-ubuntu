@@ -3,6 +3,9 @@
 #include <arpa/inet.h> // inet_ntoa()
 #include <unistd.h> //read(), write(), close()
 #include <errno.h> //global var errno
+#include <string>
+
+using namespace std;
 
 class mailServer {
 private:
@@ -15,5 +18,5 @@ public:
     mailServer(int port);
     ~mailServer();
     bool acceptance();
-    bool receive();
+    string receiveMess();
 };

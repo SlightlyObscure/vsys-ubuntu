@@ -49,10 +49,9 @@ int client::communicate() {
     string outLine;
     cin >> outLine;
     string tempStr = "Alpha Tango! Do you read?";
-    int length = tempStr.length() + 1;
 
     if(outLine == "SEND") {
-        if(send(socketNum, tempStr.c_str(), length, 0) == -1) {
+        if(send(socketNum, tempStr.c_str(), tempStr.length(), 0) == -1) {
             cerr << "ERROR: Failed to SEND message" << endl;
             return 2;
         }
