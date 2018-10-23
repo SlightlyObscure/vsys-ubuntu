@@ -45,23 +45,31 @@ client::~client () {
             cout << "Socket closed" << endl;
     }
 }
+int client::sendMess(string outLine) {
+    if(send(socketNum, outLine.c_str(), outLine.length(), 0) == -1) {
+        cerr << "ERROR: Failed to send message" << endl;
+        return 1;
+    }
+    else {
+        cout << "Message sent" << endl;
+        return 0;
+    }
+}
+
 int client::communicate() {
     string outLine;
-    cin >> outLine;
-    string tempStr = "Alpha Tango! Do you read?";
+    getline(cin, outLine);
 
-    if(outLine == "SEND") {
-        if(send(socketNum, tempStr.c_str(), tempStr.length(), 0) == -1) {
-            cerr << "ERROR: Failed to SEND message" << endl;
+    if(outLine == "QUIT" || outLine == "quit") {
+        return 1;
+    }
+    else {
+        if(sendMess(outLine) == 1) {
             return 2;
         }
         else {
-            cout << "Message sent" << endl;
             return 0;
         }
-    }
-    else if(outLine == "QUIT") {
-        return 1;
     }
 }
 

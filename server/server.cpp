@@ -63,12 +63,9 @@ string mailServer::receiveMess() {
     char mess[buffLen] = "";
     int len = 0;
     len = recv(clientSocket, mess, buffLen-1, 0);
-    if(len == -1) {
-        //cerr << "ERROR: Failed to receive message" << endl;
-    }
-    else {
+    if(len > 0) {
         mess[len] = '\0';
-        cout << "Message received: " << mess << endl; 
+        cout << "Message received: " << mess << endl;
     }
     string toStr(mess);
     return toStr;
@@ -82,4 +79,19 @@ string mailServer::receiveMess() {
 
 		return std::string(buffer);
 	}*/
+}
+
+int mailServer::handleMess(string mess) {
+    if (mess == "SEND") {
+        gotSend();
+    }
+    else {
+        return 1;
+    }
+    
+}
+
+void mailServer::gotSend() {
+    string username = receiveMess();
+    cout << "Username: " << username << endl;
 }

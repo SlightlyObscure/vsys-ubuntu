@@ -17,4 +17,5 @@ public:
     client(int port, string IpAdr);
     ~client();
     int communicate();
+    int sendMess(string outLine);
 };

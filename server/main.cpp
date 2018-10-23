@@ -75,15 +75,11 @@ int main(int argc, char* argv[]) {
             serf->acceptance();
             gotLiege = true;
         }
-        cin >> fakeNews;
         if((fakeNews = serf->receiveMess()) != "") {
-            cout << fakeNews << endl;
+            //cout << fakeNews << endl;
+            serf->handleMess(fakeNews);
         }
-        
-        /*cin >> fakeNews;
-        if(fakeNews == "quit"){
-            break;
-        } */   
+ 
     }
 
     delete serf;

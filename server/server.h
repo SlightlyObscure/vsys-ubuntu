@@ -20,4 +20,6 @@ public:
     ~mailServer();
     bool acceptance();
     string receiveMess();
+    int handleMess(string mess);
+    void gotSend();
 };
