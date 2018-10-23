@@ -10,6 +10,8 @@
 
 #include "client.h"
 
+#define BUFFER_LENGTH 1024  //maximum number of characters that can be received at once
+
 //ip loopback address 127.0.0.1
 
 using namespace std;
@@ -45,7 +47,7 @@ client::~client () {
             cout << "Socket closed" << endl;
     }
 }
-int client::sendMess(string outLine) {
+int client::sendMess(string outLine) {                                     //TO DO: actually implement output corresponding to command and control string length
     if(send(socketNum, outLine.c_str(), outLine.length(), 0) == -1) {
         cerr << "ERROR: Failed to send message" << endl;
         return 1;
@@ -59,6 +61,12 @@ int client::sendMess(string outLine) {
 int client::communicate() {
     string outLine;
     getline(cin, outLine);
+    if((outLine.length() % BUFFER_LENGTH) == 0) {        //makes sure there is no '.' right at the start of the next package
+        cout << outLine.length() << endl;
+        outLine += ' ';
+        cout << outLine.length() << endl;
+    }
+    
 
     if(outLine == "QUIT" || outLine == "quit") {
         return 1;
@@ -75,7 +83,7 @@ int client::communicate() {
 
 
 
-/*                                                     //TO DO: implement this wrapper for larger messages
+/*                                                     //TO DO: implement this wrapper for larger messages?
 int sendall(int sd, char *buf, int *len) {
     int total = 0; // how many bytes we’ve sent
     int bytesleft = *len; // how many we have left to send

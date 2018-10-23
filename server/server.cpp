@@ -7,13 +7,20 @@
 #include <arpa/inet.h> // inet_ntoa()
 #include <unistd.h> //read(), write(), close()
 #include <errno.h> //global var errno
+#include <ctime>  //get time for email file names
+#include <dirent.h>
+#include <sys/stat.h> //for making directories
+#include <fstream> //for making and writing to files
 
 #include "server.h"
 
+#define BUFFER_LENGTH 1024   //maximum number of characters that can be received at once
+
 using namespace std;
 
-mailServer::mailServer(int port) {
+mailServer::mailServer(int port, string pool) {
     this->port = port;
+    this->poolPlace = pool;
 
     cout << "Constructing server..." << endl; 
 
@@ -59,13 +66,12 @@ bool mailServer::acceptance() {                                      //TO DO: ma
 }
 
 string mailServer::receiveMess() { 
-    int buffLen = 100;       //TO DO: change this
-    char mess[buffLen] = "";
+    char mess[BUFFER_LENGTH] = "";
     int len = 0;
-    len = recv(clientSocket, mess, buffLen-1, 0);
+    len = recv(clientSocket, mess, BUFFER_LENGTH-1, 0);
     if(len > 0) {
         mess[len] = '\0';
-        cout << "Message received: " << mess << endl;
+        //cout << "Message received: " << mess << endl;
     }
     string toStr(mess);
     return toStr;
@@ -83,6 +89,7 @@ string mailServer::receiveMess() {
 
 int mailServer::handleMess(string mess) {
     if (mess == "SEND") {
+        cout << "SEND command received" << endl;
         gotSend();
     }
     else {
@@ -92,6 +99,52 @@ int mailServer::handleMess(string mess) {
 }
 
 void mailServer::gotSend() {
-    string username = receiveMess();
-    cout << "Username: " << username << endl;
+    string contentPart = "";
+    string contentFull;
+    string fileName = "";
+    DIR *dp;
+    struct dirent *dirp;
+    bool recEx = false;
+
+    string sender = receiveMess();
+    cout << "Sender (max 8 chars): " << sender << endl;
+    string receiver = receiveMess();
+    cout << "Receiver (max 8 chars): " << receiver << endl;
+    string subject = receiveMess();
+    cout << "Subject (max 80 chars): " << subject << endl;
+    cout << "Content (no max): ";
+    while(contentPart != ".") {
+        contentPart = receiveMess();
+        cout << contentPart;
+        if(contentPart != ".") {
+            contentFull += contentPart + "\n";
+        }
+    }
+    cout << endl << "Full content:" << endl << contentFull << endl;
+
+    if((dp = opendir(poolPlace.c_str())) == NULL) {                  //TO DO: send error message back to client (probably in other places too)
+        cerr << "ERROR: Failed to open mail pool directory" << endl;
+        return;
+    }
+
+    while ((dirp = readdir(dp)) != NULL) {
+        string fname = dirp->d_name;
+        if(fname == receiver) {
+            recEx = true;
+        }
+    }
+    if(!recEx) {
+        string path = poolPlace + '/' + receiver;
+        mkdir(path.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+    }
+                                                                    //TO DO: figure out naming scheme    
+    time_t now = time(0);
+    char* dt = ctime(&now);
+    string temp(dt);
+    fileName = "mails/" + receiver + '/' + sender + "|" + subject + "|" + temp ;
+    ofstream outfile(fileName);
+    outfile << "Sender: " << sender << endl;
+    outfile << "Subject: " << subject << endl;
+    outfile << "Content: " << endl << contentFull;
+    outfile.close();
 }

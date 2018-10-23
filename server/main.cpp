@@ -18,7 +18,7 @@ void usage() {
 
 int main(int argc, char* argv[]) {
     int port;
-
+    string poolPlace(argv[2]);
 
     if(argc != 3) {
         cerr << "ERROR: Incorrect number of arguments" << endl;
@@ -33,19 +33,18 @@ int main(int argc, char* argv[]) {
         usage();
         exit(1);
     }
-    else if(opendir(argv[2]) == NULL) {
+    else if(opendir(argv[2]) == NULL) {                                    
         cerr << "ERROR: Invalid path of mailspool directory" << endl;
         usage();
         exit(1);
     }
 
-    mailServer* serf = new mailServer (port);
+    mailServer* serf = new mailServer (port, poolPlace);
 
-    pid_t procID; //process ID
-
+    /*pid_t procID; //process ID
     
     //Prefork so that up to CLIENT_CAP clients can use the server at once 
-    /*for (int i = 0; i < CLIENT_CAP; i++) {
+    for (int i = 0; i < CLIENT_CAP; i++) {
         procID = fork();
         if(procID == -1) {  //failed to fork
             exit(1);
@@ -67,6 +66,7 @@ int main(int argc, char* argv[]) {
         cin >> fakeNews;
         delete serf;
     }*/
+
     string fakeNews = "";
     bool gotLiege = false;
 

@@ -9,14 +9,16 @@ using namespace std;
 
 class mailServer {
 private:
-    int socketNum;
-    struct sockaddr_in address;
+    string poolPlace;
     int port;
-    socklen_t socketLength;
+    int socketNum;
     int clientSocket;
+    struct sockaddr_in address;
+    socklen_t socketLength;
+    
 
 public:
-    mailServer(int port);
+    mailServer(int port, string pool);
     ~mailServer();
     bool acceptance();
     string receiveMess();
