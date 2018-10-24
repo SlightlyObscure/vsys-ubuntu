@@ -59,7 +59,7 @@ int client::sendMess(string outLine) {     //actually sends the message     //TO
 }
 
 
-void client::sendMessContent(){ // sending the right information with the right amount of characters
+void client::execSend(){ // sending the right information with the right amount of characters
     string outLine;
 
     //checking every input with a loop, until they get it right!!
@@ -109,7 +109,7 @@ void client::sendMessContent(){ // sending the right information with the right 
     if(sendMess(outLine) == 0){} 
     else {
         cerr << "ERROR: Failed to send message" << endl;
-        sendMessContent();    
+        execSend();    
     }
     if(outLine == ".\n"){
         break;
@@ -146,7 +146,7 @@ int client::communicate() {  //test
 
     if(outLine == "SEND\n" || outLine == "send\n" ){ //attempting to send something (if they dare)
         sendMess(outLine);
-        sendMessContent(); 
+        execSend(); 
     }
     else {
         sendMess(outLine);
