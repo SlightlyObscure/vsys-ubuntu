@@ -123,8 +123,8 @@ int client::communicate() {  //test
     
 
 
-    if( outLine != "QUIT" && outLine != "quit" && outLine != "SEND" && outLine != "send"
-        outLine != "LIST" && outLine != "list" && outLine != "READ" && outLine != "read" 
+    if( outLine != "QUIT" && outLine != "quit" && outLine != "SEND" && outLine != "send" &&
+        outLine != "LIST" && outLine != "list" && outLine != "READ" && outLine != "read" &&
         outLine != "DEL" && outLine != "del")
     {
         cout << "Known Commands: SEND LIST READ DEL QUIT" << endl;
@@ -148,11 +148,10 @@ int client::communicate() {  //test
         sendMess(outLine);
         sendMessContent(); 
 
-    } else {
-        return 0;
     }
 
-
+    return 0;
+    
     /*if(sendMess(outLine) == 1) {      //old remnant of a different time
         return 2;
     }
