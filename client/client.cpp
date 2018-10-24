@@ -47,7 +47,7 @@ client::~client () {
         cout << "Socket closed" << endl;
     }
 }
-int client::sendMess(string outLine) {                                     //TO DO: actually implement output corresponding to command and control string length
+int client::sendMess(string outLine) {     //actually sends the message     //TO DO: actually implement output corresponding to command and control string length
     if(send(socketNum, outLine.c_str(), outLine.length(), 0) == -1) {
         cerr << "ERROR: Failed to send message" << endl;
         return 1;
@@ -58,28 +58,107 @@ int client::sendMess(string outLine) {                                     //TO 
     }
 }
 
+
+void client::sendMessContent(){ // sending the right information with the right amount of characters
+    string outLine;
+
+    //checking every input with a loop, until they get it right!!
+
+    //sending sender
+    while(true){
+    cout <<  "Sender (max 8 chars): "<< endl;
+    getline(cin, outLine);
+    if(outLine.length()<= 8){
+        outLine += '\n';
+        sendMess(outLine);
+        break;
+    }
+    else {
+        cout << "Too Long..." << endl;
+    }}
+
+    //sending recipient
+    while(true){
+    cout << "Recipient (max 8 chars): "<< endl;
+    getline(cin, outLine);
+    if(outLine.length()<= 8){
+        outLine += '\n';
+        sendMess(outLine);
+        break;
+    } else {
+        cout << "Too Long..." << endl; 
+    }}
+
+    //sending subject
+    while(true){
+    cout << "Subject (max 80 chars): " << endl;
+    getline(cin, outLine);
+    if(outLine.length()<= 80){
+        outLine += '\n';
+        sendMess(outLine);
+        break;
+    } else {
+        cout << "Too Long..." << endl;
+    }}
+
+    //sending message content
+    cout << "Message Content (indefinite chars, has to end with a '.'): " << endl;
+    while(true){
+    getline(cin, outLine);
+    outLine += '\n';
+    if(sendMess(outLine) == 0){} 
+    else {
+        cerr << "ERROR: Failed to send message" << endl;
+        sendMessContent();    
+    }
+    if(outLine == ".\n"){
+        break;
+    }}
+}
+
+
 int client::communicate() {  //test
     string outLine;
     getline(cin, outLine);
     
-    if(outLine == "QUIT" || outLine == "quit") {
+
+
+    if( outLine != "QUIT" && outLine != "quit" && outLine != "SEND" && outLine != "send"
+        outLine != "LIST" && outLine != "list" && outLine != "READ" && outLine != "read" 
+        outLine != "DEL" && outLine != "del")
+    {
+        cout << "Known Commands: SEND LIST READ DEL QUIT" << endl;
+    }
+
+    if(outLine == "QUIT" || outLine == "quit") {    //quitting out of connection
         return 1;
     }
 
+
+
     if((outLine.length() % BUFFER_LENGTH) == 0) {        //makes sure there is no '.' right at the start of the next package
-        cout << outLine.length() << endl;
+        cout << outLine.length() << endl;               //TODO Test
         outLine += ' ';
         cout << outLine.length() << endl;
     }
     
     outLine += '\n';
 
-    if(sendMess(outLine) == 1) {
+    if(outLine == "SEND\n" || outLine == "send\n" ){ //attempting to send something (if they dare)
+        sendMess(outLine);
+        sendMessContent(); 
+
+    } else {
+        return 0;
+    }
+
+
+    /*if(sendMess(outLine) == 1) {      //old remnant of a different time
         return 2;
     }
     else {
         return 0;
-    }
+    }*/
 }
 
 

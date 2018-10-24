@@ -8,7 +8,7 @@
 
 using namespace std;
 
-void usage() {
+void usage() {      //correct input usage 
     cout << "Correct Usage: ./server <port number> <ip address of server>" << endl;
     return;
 }
@@ -21,7 +21,7 @@ int main(int argc, char* argv[]) {
     string IP(argv[2]);
     bool running = true;
 
-    if(argc != 3) {
+    if(argc != 3) {     //too much information
         cerr << "ERROR: Incorrect number of arguments" << endl;
         usage();
         exit(1);
@@ -29,12 +29,12 @@ int main(int argc, char* argv[]) {
     stringstream s(argv[1]);
     s >> port;
     
-    if((port == 0 && strcmp(argv[1], "0") != 0) || port < 0 || port > 65535){
+    if((port == 0 && strcmp(argv[1], "0") != 0) || port < 0 || port > 65535){   //checking for correct portnumber
         cerr << "ERROR: Invalid port number" << endl;
         usage();
         exit(1);
     }
-    else if(!regex_match(IP, valID)) {                                                       
+    else if(!regex_match(IP, valID)) {             //checking for ip address                                          
         cerr << "ERROR: Invalid IP address" << endl;
         usage();
         exit(1);
