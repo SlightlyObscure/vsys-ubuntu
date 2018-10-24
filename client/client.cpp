@@ -58,7 +58,7 @@ int client::sendMess(string outLine) {                                     //TO 
     }
 }
 
-int client::communicate() {
+int client::communicate() {  //test
     string outLine;
     getline(cin, outLine);
     
