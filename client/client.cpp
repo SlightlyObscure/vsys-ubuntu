@@ -44,7 +44,7 @@ client::~client () {
         cerr << "ERROR: Unable to close socket. Error #" << errno << endl;
     }
     else {
-            cout << "Socket closed" << endl;
+        cout << "Socket closed" << endl;
     }
 }
 int client::sendMess(string outLine) {                                     //TO DO: actually implement output corresponding to command and control string length
@@ -61,23 +61,24 @@ int client::sendMess(string outLine) {                                     //TO 
 int client::communicate() {
     string outLine;
     getline(cin, outLine);
+    
+    if(outLine == "QUIT" || outLine == "quit") {
+        return 1;
+    }
+
     if((outLine.length() % BUFFER_LENGTH) == 0) {        //makes sure there is no '.' right at the start of the next package
         cout << outLine.length() << endl;
         outLine += ' ';
         cout << outLine.length() << endl;
     }
     
+    outLine += '\n';
 
-    if(outLine == "QUIT" || outLine == "quit") {
-        return 1;
+    if(sendMess(outLine) == 1) {
+        return 2;
     }
     else {
-        if(sendMess(outLine) == 1) {
-            return 2;
-        }
-        else {
-            return 0;
-        }
+        return 0;
     }
 }
 

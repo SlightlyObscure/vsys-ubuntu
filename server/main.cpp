@@ -15,10 +15,9 @@ void usage() {
 }
 
 
-
 int main(int argc, char* argv[]) {
-    int port;
-    string poolPlace(argv[2]);
+    int port;                        //port of server
+    string poolPlace(argv[2]);      //directory of mailspool
 
     if(argc != 3) {
         cerr << "ERROR: Incorrect number of arguments" << endl;
@@ -68,18 +67,20 @@ int main(int argc, char* argv[]) {
     }*/
 
     string fakeNews = "";
-    bool gotLiege = false;
 
-    while(1) {
-        if(!gotLiege) {
-            serf->acceptance();
-            gotLiege = true;
+    while(serf->acceptance()) {          //server accepts connection and starts receiving data
+        try {
+            while (7) {
+                fakeNews = serf->receiveMess();
+                if(fakeNews != "") {
+                    //cout << fakeNews << endl;
+                    serf->handleMess(fakeNews);
+                }
+            }   
         }
-        if((fakeNews = serf->receiveMess()) != "") {
-            //cout << fakeNews << endl;
-            serf->handleMess(fakeNews);
+        catch (int e) {
+            cerr << "Warning: Connection to client lost. Error #" << errno << endl;
         }
- 
     }
 
     delete serf;
