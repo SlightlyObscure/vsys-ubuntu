@@ -101,7 +101,7 @@ void client::sendMessContent(){ // sending the right information with the right 
         cout << "Too Long..." << endl;
     }}
 
-
+    //sending message content
     cout << "Message Content (indefinite chars, has to end with a '.'): " << endl;
     while(true){
     getline(cin, outLine);
@@ -123,12 +123,14 @@ int client::communicate() {  //test
     
 
 
-    if(outLine != "QUIT" && outLine != "quit" && outLine != "SEND" && outLine != "send")
+    if( outLine != "QUIT" && outLine != "quit" && outLine != "SEND" && outLine != "send"
+        outLine != "LIST" && outLine != "list" && outLine != "READ" && outLine != "read" 
+        outLine != "DEL" && outLine != "del")
     {
         cout << "Known Commands: SEND LIST READ DEL QUIT" << endl;
     }
 
-    if(outLine == "QUIT" || outLine == "quit") {
+    if(outLine == "QUIT" || outLine == "quit") {    //quitting out of connection
         return 1;
     }
 
@@ -142,16 +144,16 @@ int client::communicate() {  //test
     
     outLine += '\n';
 
-    if(outLine == "SEND\n" || outLine == "send\n" ){ 
+    if(outLine == "SEND\n" || outLine == "send\n" ){ //attempting to send something (if they dare)
         sendMess(outLine);
-       sendMessContent(); 
+        sendMessContent(); 
 
     } else {
         return 0;
     }
 
 
-    /*if(sendMess(outLine) == 1) {
+    /*if(sendMess(outLine) == 1) {      //old remnant of a different time
         return 2;
     }
     else {

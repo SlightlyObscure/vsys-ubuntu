@@ -34,7 +34,7 @@ int main(int argc, char* argv[]) {
         usage();
         exit(1);
     }
-    else if(!regex_match(IP, valID)) {                                                       
+    else if(!regex_match(IP, valID)) {             //checking for ip address                                          
         cerr << "ERROR: Invalid IP address" << endl;
         usage();
         exit(1);
