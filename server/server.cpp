@@ -11,6 +11,7 @@
 #include <dirent.h>
 #include <sys/stat.h> //for making directories
 #include <fstream> //for making and writing to files
+#include <sstream>
 
 #include "server.h"
 
@@ -151,14 +152,16 @@ void mailServer::gotSend() {
     string contentPart = "";
     string contentFull;
     string fileName = "";
+    int fileNum = 0;
+    int curFileNum = 0;
     DIR *dp;
     struct dirent *dirp;
     bool recEx = false;
 
     string sender = receiveMess();
     cout << "Sender (max 8 chars): " << sender << endl;
-    string receiver = receiveMess();
-    cout << "Receiver (max 8 chars): " << receiver << endl;
+    string recipient = receiveMess();
+    cout << "Recipient (max 8 chars): " << recipient << endl;
     string subject = receiveMess();
     cout << "Subject (max 80 chars): " << subject << endl;
     cout << "Content (no max): ";
@@ -176,21 +179,39 @@ void mailServer::gotSend() {
         return;
     }
 
+    string fname;
     while ((dirp = readdir(dp)) != NULL) {
-        string fname = dirp->d_name;
-        if(fname == receiver) {
+        fname = dirp->d_name;
+        if(fname == recipient) {
             recEx = true;
         }
     }
+    closedir(dp);
     if(!recEx) {
-        string path = poolPlace + '/' + receiver;
+        string path = poolPlace + '/' + recipient;
         mkdir(path.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
     }
-                                                                    //TO DO: figure out naming scheme    
-    time_t now = time(0);
-    char* dt = ctime(&now);
-    string temp(dt);
-    fileName = "mails/" + receiver + '/' + sender + "|" + subject + "|" + temp ;
+    else {
+        string recPlace = poolPlace + '/' + recipient;
+        if((dp = opendir(recPlace.c_str())) == NULL) {                  //TO DO: send error message back to client (probably in other places too)
+            cerr << "ERROR: Failed to open recipient's directory" << endl;
+            return;
+        }
+        while ((dirp = readdir(dp)) != NULL) {
+            fname = dirp->d_name;
+            stringstream s(fname);
+            s >> curFileNum;
+            cout << "fname: " << fname << endl;
+            cout << "curFileNum: " <<  curFileNum << endl;
+            if(curFileNum > fileNum) {
+                fileNum = curFileNum;
+                cout << "fileNum: " << fileNum << endl;
+            }
+        }
+        closedir(dp);
+        fileNum++;
+    }
+    fileName = poolPlace + '/' + recipient + '/' + to_string(fileNum);
     ofstream outfile(fileName);
     outfile << "Sender: " << sender << endl;
     outfile << "Subject: " << subject << endl;
