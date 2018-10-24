@@ -47,7 +47,7 @@ client::~client () {
         cout << "Socket closed" << endl;
     }
 }
-int client::sendMess(string outLine) {                                     //TO DO: actually implement output corresponding to command and control string length
+int client::sendMess(string outLine) {     //actually sends the message     //TO DO: actually implement output corresponding to command and control string length
     if(send(socketNum, outLine.c_str(), outLine.length(), 0) == -1) {
         cerr << "ERROR: Failed to send message" << endl;
         return 1;
@@ -58,28 +58,100 @@ int client::sendMess(string outLine) {                                     //TO 
     }
 }
 
+
+void client::sendMessContent(){ // sending the right information with the right amount of characters
+    string outLine;
+
+    cout <<  "Sender (max 8 chars): "<< endl;
+    getline(cin, outLine);
+    if(outLine.length()<= 8){
+        outLine += '\n';
+        sendMess(outLine);
+    }
+    else {
+        cout << "Too Long..." << endl;
+        sendMessContent();
+    }
+
+
+    cout << "Recipient (max 8 chars): "<< endl;
+    getline(cin, outLine);
+    if(outLine.length()<= 8){
+        outLine += '\n';
+        sendMess(outLine);
+    } else {
+        cout << "Too Long..." << endl;
+        sendMessContent();    
+    }
+
+
+    cout << "Subject (max 80 chars): " << endl;
+    getline(cin, outLine);
+    if(outLine.length()<= 80){
+        outLine += '\n';
+        sendMess(outLine);
+    } else {
+        cout << "Too Long..." << endl;
+        sendMessContent();    
+    }
+
+
+    cout << "Message Content (indefinite chars): " << endl;
+    while(outLine != "."){
+    getline(cin, outLine);
+    }
+    outLine += '\n';
+    if(sendMess(outLine) == 0){
+
+    } else {
+        cerr << "ERROR: Failed to send message" << endl;
+        sendMessContent();    
+    }
+
+}
+
+
 int client::communicate() {  //test
     string outLine;
     getline(cin, outLine);
     
+
+
+    if(outLine != "QUIT" && outLine != "quit" && outLine != "SEND" && outLine != "send")
+    {
+        cout << "Known Commands: SEND LIST READ DEL QUIT" << endl;
+    }
+
     if(outLine == "QUIT" || outLine == "quit") {
         return 1;
     }
 
+
+
     if((outLine.length() % BUFFER_LENGTH) == 0) {        //makes sure there is no '.' right at the start of the next package
-        cout << outLine.length() << endl;
+        cout << outLine.length() << endl;               //TODO Test
         outLine += ' ';
         cout << outLine.length() << endl;
     }
     
     outLine += '\n';
 
-    if(sendMess(outLine) == 1) {
+    if(outLine == "SEND\n" || outLine == "send\n" ){ 
+        sendMess(outLine);
+        cout << "somethin"<< endl;
+       sendMessContent(); 
+       cout << "somethin"<< endl;
+    } else {
+        return 0;
+    }
+
+
+    /*if(sendMess(outLine) == 1) {
         return 2;
     }
     else {
         return 0;
-    }
+    }*/
 }
 
 

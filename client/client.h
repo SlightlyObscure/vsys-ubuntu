@@ -18,4 +18,5 @@ public:
     ~client();
     int communicate();
     int sendMess(string outLine);
+    void sendMessContent();
 };
