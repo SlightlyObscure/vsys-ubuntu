@@ -69,7 +69,7 @@ int fileNameMax(string path) {
 
 
     if((dp = opendir(path.c_str())) == NULL) {
-        cerr << "ERROR: Failed to open recipient's directory" << endl;
+        cerr << "ERROR: Failed to open directory" << endl;
         return -1;
     }
     while ((dirp = readdir(dp)) != NULL) {
@@ -90,7 +90,7 @@ int fileCount(string path) {
     int count = -2;
 
     if((dp = opendir(path.c_str())) == NULL) {
-        cerr << "ERROR: Failed to open recipient's directory" << endl;
+        cerr << "ERROR: Failed to open directory" << endl;
         return -1;
     }
     while ((dirp = readdir(dp)) != NULL) {
@@ -256,55 +256,43 @@ void mailServer::gotList() {
 
     string user = receiveMess();
     cout << "User to list: " << user << endl;
-    //Der Server antworte mit Anzahl der Nachrichten, 0 wenn keine da; Auflistung der Betreffe der Nachrichten
     string listPlace = poolPlace + '/' + user;
     highFile = fileNameMax(listPlace);
     numFiles = fileCount(listPlace);
+    if(highFile == -1 || numFiles == -1) {
+        cerr << "Warning: Couldn't open user's directory. Maybe it doesn't exist?" << endl;
+        numFiles = 0;
+    }
 
-    cout << "Number of mails: " << numFiles << endl;
+    cout << "Number of messages: " << numFiles << endl;             //!!! output to client
 
     for( ;highFile > 0; highFile--) {
         string fileName = poolPlace + '/' + user + '/' + to_string(highFile);
         ifstream opFile(fileName.c_str());
         for(int i = 0; getline(opFile, line); i++) {
             if(i==1) {
-                cout << line << endl;
+                string temp = "* " + line.substr(9);
+                cout << temp << endl;                               //!!! output to client
             }
         }
-
-        //opFile.open(fileName.c_str());
-        /*while(opFile.good()) {
-            opFile.getline(line, BUFFER_LENGTH);
-            cout << line << endl;
-        }*/
-        /*while(getline(opFile, line)) {
-            cout << line << endl;
-        }*/
-
-        //opFile.close();
     }
-
-    /*if((dp = opendir(listPlace.c_str())) == NULL) {
-        cerr << "ERROR: Failed to open mail pool directory" << endl;
-        return;
-    }
-
-    string fname;
-    while ((dirp = readdir(dp)) != NULL) {
-        fname = dirp->d_name;
-        cout << fname << endl;
-    }
-    closedir(dp);*/
 }
 
 void mailServer::gotRead() {
     DIR *dp;
     struct dirent *dirp;
+    string line;
 
     string user = receiveMess();
     cout << "User that wants to read file: " << user << endl;
     string readNum = receiveMess();
     cout << "File to read: " << readNum << endl;
+
+    string fileName = poolPlace + '/' + user + '/' + readNum;
+    ifstream opFile(fileName.c_str());
+    for(int i = 0; getline(opFile, line); i++) {
+        cout << line << endl;                               //!!! output to client
+    }
     //Der Server antwortet bei korrekten Parametern mit OK
     //Komplettes file wird an client geschickt
     //Bei Fehlern schick ERR
