@@ -10,8 +10,9 @@
 #include <ctime>  //get time for email file names
 #include <dirent.h>
 #include <sys/stat.h> //for making directories
-#include <fstream> //for making and writing to files
-#include <sstream>
+#include <fstream> //for making, reading and writing to files
+#include <sstream> //string stream
+
 
 #include "server.h"
 
@@ -59,7 +60,29 @@ ssize_t readline (int fd, void *vptr, size_t maxlen) { // Returns read buffer un
 	return (n) ; 
 } 
 
+int fileNameMax(string path) {
+    DIR *dp;
+    struct dirent *dirp;
+    int fileNum = 0;
+    int curFileNum = 0;
+    string fname;
 
+
+    if((dp = opendir(path.c_str())) == NULL) {
+        cerr << "ERROR: Failed to open recipient's directory" << endl;
+        return -1;
+    }
+    while ((dirp = readdir(dp)) != NULL) {
+        fname = dirp->d_name;
+        stringstream s(fname);
+        s >> curFileNum;
+        if(curFileNum > fileNum) {
+            fileNum = curFileNum;
+        }
+    }
+    closedir(dp);
+    return fileNum;
+}
 
 mailServer::mailServer(int port, string pool) {
     this->port = port;
@@ -111,7 +134,6 @@ bool mailServer::acceptance() {                                      //TO DO: ma
 string mailServer::receiveMess() { 
     char mess[BUFFER_LENGTH] = "";
     int len = 0;
-    //len = recv(clientSocket, mess, BUFFER_LENGTH-1, 0);
     len = readline(clientSocket, mess, BUFFER_LENGTH-1);
     if(len == -1) {
         throw 1;
@@ -121,26 +143,23 @@ string mailServer::receiveMess() {
     }
     else {
         mess[len] = '\0';
-        //cout << "Message received: " << mess << endl;
     }
     string toStr(mess);
     return toStr;
-
-
-    /*size = readline (my_socket, buffer, BUF - 1);  //TO DO: work on this
-
-	if (size > 0)
-	{
-		buffer[size] = '\0';
-
-		return std::string(buffer);
-	}*/
 }
 
 int mailServer::handleMess(string mess) {
     if (mess == "SEND") {
         cout << "SEND command received" << endl;
         gotSend();
+    }
+    else if (mess == "LIST") {
+        cout << "LIST command received" << endl;
+        gotList();
+    }
+    else if (mess == "READ") {
+        cout << "READ command received" << endl;
+        gotRead();
     }
     else if (mess == "DEL") {
         cout << "DEL command received" << endl;
@@ -157,7 +176,6 @@ void mailServer::gotSend() {  //TO DO: split into smaller functions
     string contentFull;
     string fileName = "";
     int fileNum = 0;
-    int curFileNum = 0;
     DIR *dp;
     struct dirent *dirp;
     bool recEx = false;
@@ -178,7 +196,7 @@ void mailServer::gotSend() {  //TO DO: split into smaller functions
     }
     cout << endl << "Full content:" << endl << contentFull << endl;
 
-    if((dp = opendir(poolPlace.c_str())) == NULL) {                  //TO DO: send error message back to client (probably in other places too)
+    if((dp = opendir(poolPlace.c_str())) == NULL) {
         cerr << "ERROR: Failed to open mail pool directory" << endl;
         return;
     }
@@ -191,28 +209,17 @@ void mailServer::gotSend() {  //TO DO: split into smaller functions
         }
     }
     closedir(dp);
+
     if(!recEx) {
         string path = poolPlace + '/' + recipient;
         mkdir(path.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
     }
     else {
         string recPlace = poolPlace + '/' + recipient;
-        if((dp = opendir(recPlace.c_str())) == NULL) {                  //TO DO: send error message back to client (probably in other places too)
-            cerr << "ERROR: Failed to open recipient's directory" << endl;
+        fileNum = fileNameMax(recPlace);
+        if(fileNum < 0) {
             return;
         }
-        while ((dirp = readdir(dp)) != NULL) {
-            fname = dirp->d_name;
-            stringstream s(fname);
-            s >> curFileNum;
-            cout << "fname: " << fname << endl;
-            cout << "curFileNum: " <<  curFileNum << endl;
-            if(curFileNum > fileNum) {
-                fileNum = curFileNum;
-                cout << "fileNum: " << fileNum << endl;
-            }
-        }
-        closedir(dp);
         fileNum++;
     }
     fileName = poolPlace + '/' + recipient + '/' + to_string(fileNum);
@@ -223,7 +230,88 @@ void mailServer::gotSend() {  //TO DO: split into smaller functions
     outfile.close();
 }
 
+void mailServer::gotList() {
+    DIR *dp;
+    struct dirent *dirp;
+    int highFile;
+    string line;
+
+    string user = receiveMess();
+    cout << "User to list: " << user << endl;
+    //Der Server antworte mit Anzahl der Nachrichten, 0 wenn keine da; Auflistung der Betreffe der Nachrichten
+    string listPlace = poolPlace + '/' + user;
+    highFile = fileNameMax(listPlace);
+    cout << "High file: " << highFile << endl;
+
+    for( ;highFile > 0; highFile--) {
+        cout << "test" << endl;
+        string fileName = to_string(highFile);
+        ifstream opFile;
+        opFile.open(fileName.c_str());
+        /*while(opFile.good()) {
+            opFile.getline(line, BUFFER_LENGTH);
+            cout << line << endl;
+        }*/
+        /*while(getline(opFile, line)) {
+            cout << line << endl;
+        }*/
+        opFile.close();
+    }
+
+    /*if((dp = opendir(listPlace.c_str())) == NULL) {
+        cerr << "ERROR: Failed to open mail pool directory" << endl;
+        return;
+    }
+
+    string fname;
+    while ((dirp = readdir(dp)) != NULL) {
+        fname = dirp->d_name;
+        cout << fname << endl;
+    }
+    closedir(dp);*/
+}
+
+void mailServer::gotRead() {
+    DIR *dp;
+    struct dirent *dirp;
+
+    string user = receiveMess();
+    cout << "User that wants to read file: " << user << endl;
+    string readNum = receiveMess();
+    cout << "File to read: " << readNum << endl;
+    //Der Server antwortet bei korrekten Parametern mit OK
+    //Komplettes file wird an client geschickt
+    //Bei Fehlern schick ERR
+}
+
 void mailServer::gotDel() {
+    DIR *dp;
+    struct dirent *dirp;
+
+    string user = receiveMess();
+    cout << "User that wants to delete file: " << user << endl;
     string exterm = receiveMess();
     cout << "File to be deleted: " << exterm << endl;
+    string delPlace = poolPlace + '/' + user;
+
+    if((dp = opendir(delPlace.c_str())) == NULL) {
+        cerr << "ERROR: Failed to open mail pool directory" << endl;
+        return;
+    }
+
+    string fname;
+    while ((dirp = readdir(dp)) != NULL) {
+        fname = dirp->d_name;
+        if(fname == exterm) {
+            string temp = delPlace + '/' + exterm;
+            if(remove(temp.c_str()) != 0) {
+                cerr << "ERROR: Failed to delete file" << endl;
+                //Schick ERR an client
+            }
+            else {
+                cout << "File " << exterm << " successfully removed" << endl;
+            }
+        }
+    }
+    closedir(dp);
 }
