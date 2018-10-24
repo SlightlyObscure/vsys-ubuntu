@@ -19,4 +19,7 @@ public:
     int communicate();
     int sendMess(string outLine);
     void execSend();
+    void execRead();
+    void execList();
+    void execDel();
 };

@@ -59,7 +59,7 @@ int client::sendMess(string outLine) {     //actually sends the message     //TO
 }
 
 
-void client::execSend(){ // sending the right information with the right amount of characters
+void client::execSend(){ // sending the right information with the right amount of characters, error handling missing
     string outLine;
 
     //checking every input with a loop, until they get it right!!
@@ -87,7 +87,8 @@ void client::execSend(){ // sending the right information with the right amount 
         break;
     } else {
         cout << "Too Long..." << endl; 
-    }}
+    }
+    }
 
     //sending subject
     while(true){
@@ -99,7 +100,8 @@ void client::execSend(){ // sending the right information with the right amount 
         break;
     } else {
         cout << "Too Long..." << endl;
-    }}
+    }
+    }
 
     //sending message content
     cout << "Message Content (indefinite chars, has to end with a '.'): " << endl;
@@ -113,7 +115,61 @@ void client::execSend(){ // sending the right information with the right amount 
     }
     if(outLine == ".\n"){
         break;
-    }}
+    }
+    }
+}
+
+void client::execList(){ //TODO error handling missing 
+    string outLine;
+
+    while(true){
+        cout <<  "[LIST] Username (max 8 chars): "<< endl;
+        getline(cin, outLine);
+        if(outLine.length()<= 8){
+            outLine += '\n';
+            sendMess(outLine);
+        break;
+    }
+    else {
+        cout << "Too Long..." << endl;
+    }
+    }
+
+    //server responds here with subjects
+    //receive
+}
+
+
+void client::execRead(){
+    string outLine;
+
+
+    while(true){ //input username //TODO error handling missing
+        cout <<  "[DEL] Username (max 8 chars): "<< endl;
+        getline(cin, outLine);
+        outLine += '\n';
+        if(sendMess(outLine) == 0 ){
+        break;
+        }
+    
+    }
+
+    while(true){
+        cout <<  "Input Message Number: "<< endl;
+        getline(cin, outLine);
+        if(outLine.length()<= 8){
+            outLine += '\n';
+            sendMess(outLine);
+        break;
+    }
+    }
+
+
+}
+
+
+void client::execDel(){
+
 }
 
 
