@@ -154,21 +154,42 @@ void client::execRead(){
     
     }
 
-    while(true){
+  
         cout <<  "Input Message Number: "<< endl;
         getline(cin, outLine);
-        if(outLine.length()<= 8){
-            outLine += '\n';
-            sendMess(outLine);
-        break;
-    }
-    }
+        outLine += '\n';
+        sendMess(outLine);
+
+        //server answers with OK if correct paramters
+        //receive message content as sent with send
+        // error: ERR
+    
 
 
 }
 
 
 void client::execDel(){
+    string outLine;
+
+    while(true){ //input username //TODO error handling missing
+        cout <<  "[DEL] Username (max 8 chars): "<< endl;
+        getline(cin, outLine);
+        outLine += '\n';
+        if(sendMess(outLine) == 0 ){
+        break;
+        }
+    
+    }
+
+  
+        cout <<  "Input Message Number: "<< endl;
+        getline(cin, outLine);
+        outLine += '\n';
+        sendMess(outLine);
+
+        //successfull delete: receive OK from server
+        // if error : ERR
 
 }
 
@@ -203,9 +224,19 @@ int client::communicate() {  //test
     if(outLine == "SEND\n" || outLine == "send\n" ){ //attempting to send something (if they dare)
         sendMess(outLine);
         execSend(); 
+    } else if(outLine == "LIST\n" || outLine == "list\n" ) {
+        sendMess(outLine);
+        execList();
+    } else if (outLine == "READ\n" || outLine == "read\n" ) {
+        sendMess(outLine);
+        execRead();
+    } else if (outLine == "DEL\n" || outLine == "del\n" ) {
+        sendMess(outLine);
+        execDel();
     }
     else {
         sendMess(outLine);
+        
     }
 
     return 0;
