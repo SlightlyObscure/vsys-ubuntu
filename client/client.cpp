@@ -62,52 +62,58 @@ int client::sendMess(string outLine) {     //actually sends the message     //TO
 void client::sendMessContent(){ // sending the right information with the right amount of characters
     string outLine;
 
+    //checking every input with a loop, until they get it right!!
+
+    //sending sender
+    while(true){
     cout <<  "Sender (max 8 chars): "<< endl;
     getline(cin, outLine);
     if(outLine.length()<= 8){
         outLine += '\n';
         sendMess(outLine);
+        break;
     }
     else {
         cout << "Too Long..." << endl;
-        sendMessContent();
-    }
+    }}
 
-
+    //sending recipient
+    while(true){
     cout << "Recipient (max 8 chars): "<< endl;
     getline(cin, outLine);
     if(outLine.length()<= 8){
         outLine += '\n';
         sendMess(outLine);
+        break;
     } else {
-        cout << "Too Long..." << endl;
-        sendMessContent();    
-    }
+        cout << "Too Long..." << endl; 
+    }}
 
-
+    //sending subject
+    while(true){
     cout << "Subject (max 80 chars): " << endl;
     getline(cin, outLine);
     if(outLine.length()<= 80){
         outLine += '\n';
         sendMess(outLine);
+        break;
     } else {
         cout << "Too Long..." << endl;
-        sendMessContent();    
-    }
+    }}
 
 
-    cout << "Message Content (indefinite chars): " << endl;
-    while(outLine != "."){
+    cout << "Message Content (indefinite chars, has to end with a '.'): " << endl;
+    while(true){
     getline(cin, outLine);
-    }
     outLine += '\n';
-    if(sendMess(outLine) == 0){
-
-    } else {
+    if(sendMess(outLine) == 0){} 
+    else {
         cerr << "ERROR: Failed to send message" << endl;
         sendMessContent();    
     }
-
+    if(outLine == ".\n"){
+        break;
+    }}
 }
 
 
@@ -138,9 +144,8 @@ int client::communicate() {  //test
 
     if(outLine == "SEND\n" || outLine == "send\n" ){ 
         sendMess(outLine);
-        cout << "somethin"<< endl;
        sendMessContent(); 
-       cout << "somethin"<< endl;
+
     } else {
         return 0;
     }
