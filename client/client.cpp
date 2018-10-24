@@ -123,12 +123,12 @@ int client::communicate() {  //test
     
 
 
-    if( outLine != "QUIT" && outLine != "quit" && outLine != "SEND" && outLine != "send" &&
+    /*if( outLine != "QUIT" && outLine != "quit" && outLine != "SEND" && outLine != "send" &&
         outLine != "LIST" && outLine != "list" && outLine != "READ" && outLine != "read" &&
         outLine != "DEL" && outLine != "del")
     {
         cout << "Known Commands: SEND LIST READ DEL QUIT" << endl;
-    }
+    }*/
 
     if(outLine == "QUIT" || outLine == "quit") {    //quitting out of connection
         return 1;
@@ -147,7 +147,9 @@ int client::communicate() {  //test
     if(outLine == "SEND\n" || outLine == "send\n" ){ //attempting to send something (if they dare)
         sendMess(outLine);
         sendMessContent(); 
-
+    }
+    else {
+        sendMess(outLine);
     }
 
     return 0;

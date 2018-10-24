@@ -84,6 +84,23 @@ int fileNameMax(string path) {
     return fileNum;
 }
 
+int fileCount(string path) {
+    DIR *dp;
+    struct dirent *dirp;
+    int count = -2;
+
+    if((dp = opendir(path.c_str())) == NULL) {
+        cerr << "ERROR: Failed to open recipient's directory" << endl;
+        return -1;
+    }
+    while ((dirp = readdir(dp)) != NULL) {
+        count++;
+    }
+    closedir(dp);
+    return count;
+
+}
+
 mailServer::mailServer(int port, string pool) {
     this->port = port;
     this->poolPlace = pool;
@@ -234,6 +251,7 @@ void mailServer::gotList() {
     DIR *dp;
     struct dirent *dirp;
     int highFile;
+    int numFiles;
     string line;
 
     string user = receiveMess();
@@ -241,13 +259,20 @@ void mailServer::gotList() {
     //Der Server antworte mit Anzahl der Nachrichten, 0 wenn keine da; Auflistung der Betreffe der Nachrichten
     string listPlace = poolPlace + '/' + user;
     highFile = fileNameMax(listPlace);
-    cout << "High file: " << highFile << endl;
+    numFiles = fileCount(listPlace);
+
+    cout << "Number of mails: " << numFiles << endl;
 
     for( ;highFile > 0; highFile--) {
-        cout << "test" << endl;
-        string fileName = to_string(highFile);
-        ifstream opFile;
-        opFile.open(fileName.c_str());
+        string fileName = poolPlace + '/' + user + '/' + to_string(highFile);
+        ifstream opFile(fileName.c_str());
+        for(int i = 0; getline(opFile, line); i++) {
+            if(i==1) {
+                cout << line << endl;
+            }
+        }
+
+        //opFile.open(fileName.c_str());
         /*while(opFile.good()) {
             opFile.getline(line, BUFFER_LENGTH);
             cout << line << endl;
@@ -255,7 +280,8 @@ void mailServer::gotList() {
         /*while(getline(opFile, line)) {
             cout << line << endl;
         }*/
-        opFile.close();
+
+        //opFile.close();
     }
 
     /*if((dp = opendir(listPlace.c_str())) == NULL) {
