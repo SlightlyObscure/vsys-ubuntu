@@ -27,4 +27,5 @@ public:
     string receiveMess();
     int handleMess(string mess);
     void gotSend();
+    void gotDel();
 };

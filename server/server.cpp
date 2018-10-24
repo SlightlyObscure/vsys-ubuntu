@@ -142,13 +142,17 @@ int mailServer::handleMess(string mess) {
         cout << "SEND command received" << endl;
         gotSend();
     }
+    else if (mess == "DEL") {
+        cout << "DEL command received" << endl;
+        gotDel();
+    }
     else {
         return 1;
     }
     
 }
 
-void mailServer::gotSend() {
+void mailServer::gotSend() {  //TO DO: split into smaller functions
     string contentPart = "";
     string contentFull;
     string fileName = "";
@@ -217,4 +221,9 @@ void mailServer::gotSend() {
     outfile << "Subject: " << subject << endl;
     outfile << "Content: " << endl << contentFull;
     outfile.close();
+}
+
+void mailServer::gotDel() {
+    string exterm = receiveMess();
+    cout << "File to be deleted: " << exterm << endl;
 }
