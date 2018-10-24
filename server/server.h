@@ -24,6 +24,7 @@ public:
     mailServer(int port, string pool);
     ~mailServer();
     bool acceptance();
+    int sendMess(string outLine);
     string receiveMess();
     int handleMess(string mess);
     void gotSend();

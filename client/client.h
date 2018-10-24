@@ -8,6 +8,9 @@
 
 using namespace std;
 
+ssize_t readline (int fd, void *vptr, size_t maxlen);
+static ssize_t my_read (int fd, char *ptr);
+
 class client {
 private:
     int socketNum;
@@ -18,6 +21,7 @@ public:
     ~client();
     int communicate();
     int sendMess(string outLine);
+    string receiveMess();
     void execSend();
     void execRead();
     void execList();

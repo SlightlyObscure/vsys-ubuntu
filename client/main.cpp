@@ -47,6 +47,9 @@ int main(int argc, char* argv[]) {
             running = false;                    //TO DO: maybe different handling for different return values?
         }
     }
+    catch (int e) {
+        cerr << "ERROR: Something bad happened. Error #" << errno << endl;
+    }
 
     delete liege;
 }

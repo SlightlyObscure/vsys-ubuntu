@@ -16,6 +16,46 @@
 
 using namespace std;
 
+static ssize_t my_read (int fd, char *ptr) {
+	static int   read_cnt = 0 ; 
+	static char  *read_ptr ; 
+	static char  read_buf[BUFFER_LENGTH]; 
+	if (read_cnt <= 0) { 
+		again: 
+		if ( (read_cnt = read(fd,read_buf,sizeof(read_buf))) < 0) { 
+			if (errno == EINTR) 
+				goto again ; 
+			return (-1) ; 
+		} else if (read_cnt == 0) 
+		return (0) ; 
+		read_ptr = read_buf ; 
+	} ; 
+	read_cnt-- ; 
+	*ptr = *read_ptr++ ; 
+	return (1) ; 
+}
+
+ssize_t readline (int fd, void *vptr, size_t maxlen) { // Returns read buffer until _next_ character is a newline
+	ssize_t   n, rc ; 
+	char      c, *ptr ; 
+	ptr = (char*)vptr ; 
+	for (n = 1 ; n < maxlen ; n++) { 
+		if ( (rc = my_read(fd,&c)) == 1 ) { 
+			if (c == '\n')
+				break; // Newline is not included in the returned string!
+			*ptr++ = c ; 
+		} else if (rc == 0) { 
+			if (n == 1) 
+		         return (0) ;         // EOF, no data read 
+		     else 
+		         break ;              // EOF, some data was read 
+		 } else 
+		       return (-1) ;          // error, errno set by read() in my_read() 
+		   } ; 
+	*ptr = 0 ;                   // null terminate 
+	return (n) ; 
+} 
+
 client::client(int port, string IpAdr) {
     this->port = port;
 
@@ -47,7 +87,7 @@ client::~client () {
         cout << "Socket closed" << endl;
     }
 }
-int client::sendMess(string outLine) {     //actually sends the message     //TO DO: actually implement output corresponding to command and control string length
+int client::sendMess(string outLine) {     //actually sends the message
     if(send(socketNum, outLine.c_str(), outLine.length(), 0) == -1) {
         cerr << "ERROR: Failed to send message" << endl;
         return 1;
@@ -56,6 +96,23 @@ int client::sendMess(string outLine) {     //actually sends the message     //TO
         cout << "Message sent" << endl;
         return 0;
     }
+}
+
+string client::receiveMess() {                 //TO DO: test if works
+    char mess[BUFFER_LENGTH] = "";
+    int len = 0;
+    len = readline(socketNum, mess, BUFFER_LENGTH-1);
+    if(len == -1) {
+        throw 1;
+    }
+    else if(len == 0) {
+        throw 2;
+    }
+    else {
+        mess[len] = '\0';
+    }
+    string toStr(mess);
+    return toStr;
 }
 
 
@@ -135,6 +192,8 @@ void client::execList(){ //TODO error handling missing
     }
     }
 
+    //string test = receiveMess();
+    //cout << test << endl;
     //server responds here with subjects
     //receive
 }

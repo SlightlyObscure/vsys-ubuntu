@@ -148,6 +148,17 @@ bool mailServer::acceptance() {                                      //TO DO: ma
     return true;
 }
 
+int mailServer::sendMess(string outLine) {     //actually sends the message 
+    if(send(clientSocket, outLine.c_str(), outLine.length(), 0) == -1) {           //TO DO: test if works
+        cerr << "ERROR: Failed to send message" << endl;
+        return 1;
+    }
+    else {
+        cout << "Message sent" << endl;
+        return 0;
+    }
+}
+
 string mailServer::receiveMess() { 
     char mess[BUFFER_LENGTH] = "";
     int len = 0;
@@ -265,6 +276,8 @@ void mailServer::gotList() {
     }
 
     cout << "Number of messages: " << numFiles << endl;             //!!! output to client
+    string mess = "Number of messages: " + numFiles;
+    sendMess(mess);
 
     for( ;highFile > 0; highFile--) {
         string fileName = poolPlace + '/' + user + '/' + to_string(highFile);
