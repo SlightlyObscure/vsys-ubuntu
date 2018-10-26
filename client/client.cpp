@@ -87,6 +87,8 @@ client::~client () {
         cout << "Socket closed" << endl;
     }
 }
+
+
 int client::sendMess(string outLine) {     //actually sends the message
     if(send(socketNum, outLine.c_str(), outLine.length(), 0) == -1) {
         cerr << "ERROR: Failed to send message" << endl;

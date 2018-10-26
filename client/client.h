@@ -14,6 +14,7 @@ static ssize_t my_read (int fd, char *ptr);
 class client {
 private:
     int socketNum;
+    int serverSpeekSocket;
     struct sockaddr_in address;
     int port;
 public:
