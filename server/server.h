@@ -18,7 +18,6 @@ private:
     int clientSocket;
     struct sockaddr_in address;
     socklen_t socketLength;
-    
 
 public:
     mailServer(int port, string pool);

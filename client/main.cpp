@@ -42,14 +42,16 @@ int main(int argc, char* argv[]) {
     string IpAdr(argv[2]);                        //TO DO: move elsewhere
 
     client* liege = new client (port, IpAdr);
-    while(running) {
-        if(liege->communicate() != 0) {
-            running = false;                    //TO DO: maybe different handling for different return values?
+    try {
+        while(running) {
+            if(liege->communicate() != 0) {
+                running = false;                    //TO DO: maybe different handling for different return values?
+            }
         }
     }
-    /*catch (int e) {
+    catch (int e) {
         cerr << "ERROR: Something bad happened. Error #" << errno << endl;
-    }*/
+    }
 
     delete liege;
 }

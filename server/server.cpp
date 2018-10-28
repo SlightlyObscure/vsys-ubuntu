@@ -226,6 +226,7 @@ void mailServer::gotSend() {  //TO DO: split into smaller functions
 
     if((dp = opendir(poolPlace.c_str())) == NULL) {
         cerr << "ERROR: Failed to open mail pool directory" << endl;
+        sendMess("ERR\n");
         return;
     }
 
@@ -256,13 +257,15 @@ void mailServer::gotSend() {  //TO DO: split into smaller functions
     outfile << "Subject: " << subject << endl;
     outfile << "Content: " << endl << contentFull;
     outfile.close();
+
+    sendMess("OK\n");
+
 }
 
 void mailServer::gotList() {
     DIR *dp;
     struct dirent *dirp;
-    int highFile;
-    int numFiles;
+    int highFile, numFiles;
     string line;
 
     string user = receiveMess();
@@ -275,8 +278,8 @@ void mailServer::gotList() {
         numFiles = 0;
     }
 
-    cout << "Number of messages: " << numFiles << endl;             //!!! output to client
-    string mess = "Number of messages: " + numFiles;
+    string mess = "Number of messages: " + to_string(numFiles) + '\n';
+    cout << mess << endl; 
     sendMess(mess);
 
     for( ;highFile > 0; highFile--) {
@@ -284,11 +287,13 @@ void mailServer::gotList() {
         ifstream opFile(fileName.c_str());
         for(int i = 0; getline(opFile, line); i++) {
             if(i==1) {
-                string temp = "* " + line.substr(9);
-                cout << temp << endl;                               //!!! output to client
+                string temp = "* " + line.substr(9)  + '\n';
+                cout << temp; 
+                sendMess(temp);
             }
         }
     }
+    sendMess(".\n");
 }
 
 void mailServer::gotRead() {
@@ -305,7 +310,10 @@ void mailServer::gotRead() {
     ifstream opFile(fileName.c_str());
     for(int i = 0; getline(opFile, line); i++) {
         cout << line << endl;                               //!!! output to client
+        //sendMess(line);
     }
+    //sendMess(".\n");
+    
     //Der Server antwortet bei korrekten Parametern mit OK
     //Komplettes file wird an client geschickt
     //Bei Fehlern schick ERR
