@@ -287,7 +287,7 @@ void mailServer::gotList() {
         ifstream opFile(fileName.c_str());
         for(int i = 0; getline(opFile, line); i++) {
             if(i==1) {
-                string temp = to_string(highFile) + ") " + line.substr(9)  + '\n';
+                string temp = to_string(highFile) + ": " + line.substr(9)  + '\n';
                 cout << temp; 
                 sendMess(temp);
             }
@@ -300,6 +300,7 @@ void mailServer::gotRead() {
     DIR *dp;
     struct dirent *dirp;
     string line;
+    bool subsequent = false;
 
     string user = receiveMess();
     cout << "User that wants to read file: " << user << endl;
@@ -309,8 +310,15 @@ void mailServer::gotRead() {
     string fileName = poolPlace + '/' + user + '/' + readNum;
     ifstream opFile(fileName.c_str());
     for(int i = 0; getline(opFile, line); i++) {
+        if(subsequent == false) {
+            subsequent = true;
+            sendMess("OK\n");
+        }
         cout << line << endl;                               //!!! output to client
-        sendMess(line);
+        sendMess(line+ '\n');
+    }
+    if(subsequent == false) {
+        sendMess("ERR\n");
     }
     sendMess(".\n");
     

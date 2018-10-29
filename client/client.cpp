@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <string>
+#include <sstream>
 #include <sys/socket.h> //socket(), bind()
 #include <netinet/in.h> //struct sockaddr_in (see vsys_teil2 page 11)
 #include <arpa/inet.h> // inet_ntoa()
@@ -120,6 +121,8 @@ string client::receiveMess() {
 
 int client::communicate() {  //test
     string outLine;
+
+    cout << "Command: ";
     getline(cin, outLine);
 
     if(outLine == "QUIT" || outLine == "quit") {    //quitting out of connection
@@ -171,7 +174,7 @@ void client::execSend(){ // sending the right information with the right amount 
 
     //sending sender
     while(prog==0){
-        cout <<  "Sender (max 8 chars): ";
+        cout <<  "[SEND] Sender (max 8 chars): ";
         getline(cin, outLine);
         if(outLine.length()<= 8 && outLine.length()!=0){
             if(sendMess(outLine)==0) {
@@ -182,13 +185,13 @@ void client::execSend(){ // sending the right information with the right amount 
             }
         }
         else {
-            cout << "Too Long..." << endl;
+            cout << "[SEND] Too Long..." << endl;
         }
     }
 
     //sending recipient
     while(prog==1){
-        cout << "Recipient (max 8 chars): "; 
+        cout << "[SEND] Recipient (max 8 chars): "; 
         getline(cin, outLine);                          
         if(outLine.length()<= 8 && outLine.length()!=0){
             if(sendMess(outLine)==0) {
@@ -199,13 +202,13 @@ void client::execSend(){ // sending the right information with the right amount 
             }
         } 
         else {
-            cout << "Too Long..." << endl; 
+            cout << "[SEND] Too Long..." << endl; 
         }
     }
 
     //sending subject
     while(prog==2){
-        cout << "Subject (max 80 chars): ";
+        cout << "[SEND] Subject (max 80 chars): ";
         getline(cin, outLine);
         if(outLine.length()<= 80 && outLine.length()!=0){
             if(sendMess(outLine)==0) {
@@ -216,12 +219,12 @@ void client::execSend(){ // sending the right information with the right amount 
             }
         } 
         else {
-            cout << "Too Long..." << endl;
+            cout << "[SEND] Too Long..." << endl;
         }
     }
 
     //sending message content
-    cout << "Message Content (no limit; send with input '.\\n'): " << endl;
+    cout << "[SEND] Message Content (no limit; send with input '.\\n'): " << endl;
     while(prog==3){
         getline(cin, outLine);
         if(outLine.length()!=0){
@@ -243,7 +246,7 @@ void client::execList(){
     string outLine, inLine;
 
     while(true){
-        cout <<  "[LIST] Username (max 8 chars): "<< endl;
+        cout <<  "[LIST] Username (max 8 chars): ";
         getline(cin, outLine);
         if(outLine.length()<= 8){
             if(sendMess(outLine) == 0) {
@@ -254,7 +257,7 @@ void client::execList(){
             }
         }
         else {
-            cout << "Too Long..." << endl;
+            cout << "[LIST] Too Long..." << endl;
         }
     }
 
@@ -270,9 +273,10 @@ void client::execList(){
 void client::execRead(){
     string outLine, inLine;
     int prog = 0;
+    int messNum;
 
     while(prog==0){ //input username //TODO error handling missing
-        cout <<  "[READ] Username (max 8 chars): "<< endl;
+        cout <<  "[READ] Username (max 8 chars): ";
         getline(cin, outLine);
         if(sendMess(outLine) == 0 ){
             prog++;
@@ -283,35 +287,33 @@ void client::execRead(){
     }
 
     while(prog==1) {
-        cout <<  "Input Message Number: "<< endl;
+        cout <<  "[READ] Input Message Number: ";
         getline(cin, outLine);
-        /*cout << to_string(outline) << endl;  //TO DO: check if input is int
-        if(to_string(outline)<=0) {
+        stringstream s(outLine);
+        s >> messNum;
+        if(messNum<=0) {
             cerr << "ERROR: Message number must be an integer greater than 0" << endl;
         }
-        else {*/
+        else {
             if(sendMess(outLine) == 0) {
                 prog++;
             }
             else {
                 cerr << "ERROR: Failed to send message" << endl;
             }
-        //}
-    }
-    
-    while(inLine!=".") {
-        inLine = receiveMess();
-        if(inLine!=".") {
-            cout << inLine << endl;
         }
     }
 
-    //server answers with OK if correct paramters
-    //receive message content as sent with send
-    // error: ERR
-    
-
-
+    inLine = receiveMess();
+    cout << inLine << endl;
+    if(inLine == "OK") {
+        while(inLine!=".") {
+            inLine = receiveMess();
+            if(inLine!=".") {
+                cout << "   " << inLine << endl;
+            }
+        }
+    }
 }
 
 
