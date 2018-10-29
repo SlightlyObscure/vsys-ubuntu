@@ -287,7 +287,7 @@ void mailServer::gotList() {
         ifstream opFile(fileName.c_str());
         for(int i = 0; getline(opFile, line); i++) {
             if(i==1) {
-                string temp = "* " + line.substr(9)  + '\n';
+                string temp = to_string(highFile) + ") " + line.substr(9)  + '\n';
                 cout << temp; 
                 sendMess(temp);
             }
@@ -310,9 +310,9 @@ void mailServer::gotRead() {
     ifstream opFile(fileName.c_str());
     for(int i = 0; getline(opFile, line); i++) {
         cout << line << endl;                               //!!! output to client
-        //sendMess(line);
+        sendMess(line);
     }
-    //sendMess(".\n");
+    sendMess(".\n");
     
     //Der Server antwortet bei korrekten Parametern mit OK
     //Komplettes file wird an client geschickt

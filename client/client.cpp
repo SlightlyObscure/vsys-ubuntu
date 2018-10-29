@@ -268,7 +268,7 @@ void client::execList(){
 
 
 void client::execRead(){
-    string outLine;
+    string outLine, inLine;
     int prog = 0;
 
     while(prog==0){ //input username //TODO error handling missing
@@ -299,7 +299,12 @@ void client::execRead(){
         //}
     }
     
-    
+    while(inLine!=".") {
+        inLine = receiveMess();
+        if(inLine!=".") {
+            cout << inLine << endl;
+        }
+    }
 
     //server answers with OK if correct paramters
     //receive message content as sent with send
