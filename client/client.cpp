@@ -101,7 +101,7 @@ int client::sendMess(string outLine) {     //actually sends the message
     }
 }
 
-string client::receiveMess() {                 //TO DO: test if works
+string client::receiveMess() {
     char mess[BUFFER_LENGTH] = "";
     int len = 0;
     len = readline(socketNum, mess, BUFFER_LENGTH-1);
@@ -239,16 +239,19 @@ void client::execSend(){ // sending the right information with the right amount 
 
 }
 
-void client::execList(){ //TODO error handling missing 
+void client::execList(){ 
     string outLine, inLine;
 
     while(true){
         cout <<  "[LIST] Username (max 8 chars): "<< endl;
         getline(cin, outLine);
         if(outLine.length()<= 8){
-            outLine += '\n';
-            sendMess(outLine);
-            break;
+            if(sendMess(outLine) == 0) {
+                break;
+            }
+            else {
+                cerr << "ERROR: Failed to send message" << endl;
+            }
         }
         else {
             cout << "Too Long..." << endl;
@@ -266,27 +269,41 @@ void client::execList(){ //TODO error handling missing
 
 void client::execRead(){
     string outLine;
+    int prog = 0;
 
-
-    while(true){ //input username //TODO error handling missing
-        cout <<  "[DEL] Username (max 8 chars): "<< endl;
+    while(prog==0){ //input username //TODO error handling missing
+        cout <<  "[READ] Username (max 8 chars): "<< endl;
         getline(cin, outLine);
-        outLine += '\n';
         if(sendMess(outLine) == 0 ){
-        break;
+            prog++;
         }
-    
+        else {
+            cerr << "ERROR: Failed to send message" << endl;
+        }
     }
 
-  
+    while(prog==1) {
         cout <<  "Input Message Number: "<< endl;
         getline(cin, outLine);
-        outLine += '\n';
-        sendMess(outLine);
+        /*cout << to_string(outline) << endl;  //TO DO: check if input is int
+        if(to_string(outline)<=0) {
+            cerr << "ERROR: Message number must be an integer greater than 0" << endl;
+        }
+        else {*/
+            if(sendMess(outLine) == 0) {
+                prog++;
+            }
+            else {
+                cerr << "ERROR: Failed to send message" << endl;
+            }
+        //}
+    }
+    
+    
 
-        //server answers with OK if correct paramters
-        //receive message content as sent with send
-        // error: ERR
+    //server answers with OK if correct paramters
+    //receive message content as sent with send
+    // error: ERR
     
 
 
@@ -299,7 +316,6 @@ void client::execDel(){
     while(true){ //input username //TODO error handling missing
         cout <<  "[DEL] Username (max 8 chars): "<< endl;
         getline(cin, outLine);
-        outLine += '\n';
         if(sendMess(outLine) == 0 ){
         break;
         }
@@ -309,7 +325,6 @@ void client::execDel(){
   
         cout <<  "Input Message Number: "<< endl;
         getline(cin, outLine);
-        outLine += '\n';
         sendMess(outLine);
 
         //successfull delete: receive OK from server

@@ -149,7 +149,7 @@ bool mailServer::acceptance() {                                      //TO DO: ma
 }
 
 int mailServer::sendMess(string outLine) {     //actually sends the message 
-    if(send(clientSocket, outLine.c_str(), outLine.length(), 0) == -1) {           //TO DO: test if works
+    if(send(clientSocket, outLine.c_str(), outLine.length(), 0) == -1) {
         cerr << "ERROR: Failed to send message" << endl;
         return 1;
     }
