@@ -17,7 +17,7 @@
 
 using namespace std;
 
-static ssize_t my_read (int fd, char *ptr) {
+static ssize_t my_read (int fd, char *ptr) { //reads messages from socket
 	static int   read_cnt = 0 ; 
 	static char  *read_ptr ; 
 	static char  read_buf[BUFFER_LENGTH]; 
@@ -66,7 +66,7 @@ client::client(int port, string IpAdr) {
 
     memset(&address, 0, sizeof(address)); //Sicherstellen dass Adresse 0 ist
     address.sin_family = AF_INET; //IPv4
-    address.sin_port = htons(port); //Port nummer <port>
+    address.sin_port = htons(port); //Port Nummer <port>
 
     inet_aton(IpAdr.c_str(), &address.sin_addr);
 
@@ -81,7 +81,7 @@ client::client(int port, string IpAdr) {
     }
 }
 client::~client () {
-	if(close(socketNum) == -1) {
+	if(close(socketNum) == -1) {    //try to close socket 
         cerr << "ERROR: Unable to close socket. Error #" << errno << endl;
     }
     else {
@@ -91,7 +91,7 @@ client::~client () {
 
 
 int client::sendMess(string outLine) {     //actually sends the message
-    outLine += '\n';
+    outLine += '\n';    //data is sent after each \n or if buffer is full
     if(send(socketNum, outLine.c_str(), outLine.length(), 0) == -1) {
         cerr << "ERROR: Failed to send message" << endl;
         return 1;
@@ -105,12 +105,11 @@ int client::sendMess(string outLine) {     //actually sends the message
 string client::receiveMess() {
     char mess[BUFFER_LENGTH] = "";
     int len = 0;
-    len = readline(socketNum, mess, BUFFER_LENGTH-1);
-    if(len == -1) {
+    len = readline(socketNum, mess, BUFFER_LENGTH-1); 
+    if(len == -1) {     //client (probably) closed socket
         throw 1;
     }
-    else if(len == 0) {
-        cout << "test" << endl;
+    else if(len == 0) {     //other errors
         throw 2;
     }
     else {
@@ -120,7 +119,7 @@ string client::receiveMess() {
     return toStr;
 }
 
-int client::communicate() {  //test
+int client::communicate() {
     string outLine;
 
     cout << "Command: ";
@@ -129,14 +128,8 @@ int client::communicate() {  //test
     if(outLine == "QUIT" || outLine == "quit") {    //quitting out of connection
         return 1;
     }
-
-    if((outLine.length() % BUFFER_LENGTH) == 0) {        //makes sure there is no '.' right at the start of the next package
-        cout << outLine.length() << endl;               //TODO Test
-        outLine += ' ';
-        cout << outLine.length() << endl;
-    }
     
-    if(outLine == "SEND" || outLine == "send" ){ //attempting to send something (if they dare)
+    if(outLine == "SEND" || outLine == "send" ){    //each valid command leads to a different function; once completed the loop in main.cpp returns to here
         if(sendMess(outLine) == 1) {
             return 2;
         }
@@ -167,7 +160,7 @@ int client::communicate() {  //test
 
 
 
-void client::execSend(){ // sending the right information with the right amount of characters, error handling missing
+void client::execSend(){ // sending the right information with the right amount of characters
     string outLine;
     int prog = 0;
 
@@ -178,7 +171,7 @@ void client::execSend(){ // sending the right information with the right amount 
         cout <<  "[SEND] Sender (max 8 chars): ";
         getline(cin, outLine);
         if(outLine.length()<= 8 && outLine.length()!=0){
-            if(sendMess(outLine)==0) {
+            if(sendMess(outLine)==0) {      //everything went well -> procede to next loop
                 prog++;
             }
             else {
@@ -186,7 +179,7 @@ void client::execSend(){ // sending the right information with the right amount 
             }
         }
         else {
-            cout << "[SEND] Too Long..." << endl;
+            cout << "[SEND] Too Long..." << endl;   //entered string was too long
         }
     }
 
@@ -238,7 +231,8 @@ void client::execSend(){ // sending the right information with the right amount 
         }
     }
 
-    string inLine = receiveMess();
+    //receive OK or ERR from server
+    string inLine = receiveMess();  
     cout << inLine << endl;
 
 }
@@ -246,6 +240,7 @@ void client::execSend(){ // sending the right information with the right amount 
 void client::execList(){ 
     string outLine, inLine;
 
+    //enter username
     while(true){
         cout <<  "[LIST] Username (max 8 chars): ";
         getline(cin, outLine);
@@ -261,8 +256,9 @@ void client::execList(){
             cout << "[LIST] Too Long..." << endl;
         }
     }
-
-    while(inLine!=".") {
+    
+    //print list
+    while(inLine!=".") {        //read from socket until server sends "."
         inLine = receiveMess();
         if(inLine!=".") {
             cout << inLine << endl;
@@ -276,7 +272,8 @@ void client::execRead(){
     int prog = 0;
     int messNum;
 
-    while(prog==0){ //input username //TODO error handling missing
+    //input username
+    while(prog==0){ 
         cout <<  "[READ] Username (max 8 chars): ";
         getline(cin, outLine);
         if(outLine.length()<= 8){
@@ -292,6 +289,7 @@ void client::execRead(){
         }
     }
 
+    //input number of the message; numbers are displayed via LIST
     while(prog==1) {
         cout <<  "[READ] Input Message Number: ";
         getline(cin, outLine);
@@ -310,8 +308,10 @@ void client::execRead(){
         }
     }
 
+    //receive OK or ERR from server
     inLine = receiveMess();
     cout << inLine << endl;
+    //if message was successfully found -> read from socket until server sends "."
     if(inLine == "OK") {
         while(inLine!=".") {
             inLine = receiveMess();
@@ -328,7 +328,8 @@ void client::execDel(){
     int prog = 0;
     int messNum;
 
-    while(prog==0){ //input username //TODO error handling missing
+    //input username
+    while(prog==0){
         cout <<  "[DEL] Username (max 8 chars): "<< endl;
         getline(cin, outLine);
         if(outLine.length()<= 8){
@@ -344,6 +345,7 @@ void client::execDel(){
         }
     }
 
+    //input number of the message; numbers are displayed via LIST
     while(prog==1) {
         cout <<  "[DEL] Input Message Number: ";
         getline(cin, outLine);
@@ -362,6 +364,7 @@ void client::execDel(){
         }
     }
 
+    //receive OK or ERR from server
     inLine = receiveMess();
     cout << inLine << endl;
 

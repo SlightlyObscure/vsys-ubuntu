@@ -20,7 +20,7 @@
 
 using namespace std;
 
-static ssize_t my_read (int fd, char *ptr) {
+static ssize_t my_read (int fd, char *ptr) { //reads messages from socket
 	static int   read_cnt = 0 ; 
 	static char  *read_ptr ; 
 	static char  read_buf[BUFFER_LENGTH]; 
@@ -60,13 +60,12 @@ ssize_t readline (int fd, void *vptr, size_t maxlen) { // Returns read buffer un
 	return (n) ; 
 } 
 
-int fileNameMax(string path) {
+int fileNameMax(string path) { //returns the name of the mail file with the largest number as its name
     DIR *dp;
     struct dirent *dirp;
     int fileNum = 0;
     int curFileNum = 0;
     string fname;
-
 
     if((dp = opendir(path.c_str())) == NULL) {
         cerr << "ERROR: Failed to open directory" << endl;
@@ -84,7 +83,7 @@ int fileNameMax(string path) {
     return fileNum;
 }
 
-int fileCount(string path) {
+int fileCount(string path) { //returns number of files in a folder
     DIR *dp;
     struct dirent *dirp;
     int count = -2;
@@ -149,7 +148,7 @@ bool mailServer::acceptance() {                                      //TO DO: ma
 }
 
 int mailServer::sendMess(string outLine) {     //actually sends the message 
-    if(send(clientSocket, outLine.c_str(), outLine.length(), 0) == -1) {
+    if(send(clientSocket, outLine.c_str(), outLine.length(), 0) == -1) {  //data is sent after each \n or if buffer is full
         cerr << "ERROR: Failed to send message" << endl;
         return 1;
     }
@@ -159,7 +158,7 @@ int mailServer::sendMess(string outLine) {     //actually sends the message
     }
 }
 
-string mailServer::receiveMess() { 
+string mailServer::receiveMess() {
     char mess[BUFFER_LENGTH] = "";
     int len = 0;
     len = readline(clientSocket, mess, BUFFER_LENGTH-1);
@@ -176,7 +175,7 @@ string mailServer::receiveMess() {
     return toStr;
 }
 
-int mailServer::handleMess(string mess) {
+int mailServer::handleMess(string mess) {   //reaction to command sent by client
     if (mess == "SEND") {
         cout << "SEND command received" << endl;
         gotSend();
@@ -199,7 +198,7 @@ int mailServer::handleMess(string mess) {
     
 }
 
-void mailServer::gotSend() {  //TO DO: split into smaller functions
+void mailServer::gotSend() {       //TO DO: split into smaller functions
     string contentPart = "";
     string contentFull;
     string fileName = "";
@@ -208,13 +207,13 @@ void mailServer::gotSend() {  //TO DO: split into smaller functions
     struct dirent *dirp;
     bool recEx = false;
 
-    string sender = receiveMess();
+    string sender = receiveMess();  //receive sender
     cout << "Sender (max 8 chars): " << sender << endl;
-    string recipient = receiveMess();
+    string recipient = receiveMess();   //receive recipient
     cout << "Recipient (max 8 chars): " << recipient << endl;
-    string subject = receiveMess();
+    string subject = receiveMess(); //receive message subject
     cout << "Subject (max 80 chars): " << subject << endl;
-    cout << "Content (no max): ";
+    cout << "Content (no max): ";   //receive content until "." is sent
     while(contentPart != ".") {
         contentPart = receiveMess();
         cout << contentPart;
@@ -224,14 +223,14 @@ void mailServer::gotSend() {  //TO DO: split into smaller functions
     }
     cout << endl << "Full content:" << endl << contentFull << endl;
 
-    if((dp = opendir(poolPlace.c_str())) == NULL) {
+    if((dp = opendir(poolPlace.c_str())) == NULL) { //try to open mails pool directory
         cerr << "ERROR: Failed to open mail pool directory" << endl;
         sendMess("ERR\n");
         return;
     }
 
     string fname;
-    while ((dirp = readdir(dp)) != NULL) {
+    while ((dirp = readdir(dp)) != NULL) {  //look for folder with name of recipient
         fname = dirp->d_name;
         if(fname == recipient) {
             recEx = true;
@@ -239,7 +238,7 @@ void mailServer::gotSend() {  //TO DO: split into smaller functions
     }
     closedir(dp);
 
-    if(!recEx) {
+    if(!recEx) {    //folder with name of recipient doesn't exist yet -> make one
         string path = poolPlace + '/' + recipient;
         mkdir(path.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
     }
@@ -252,7 +251,7 @@ void mailServer::gotSend() {  //TO DO: split into smaller functions
         fileNum++;
     }
     fileName = poolPlace + '/' + recipient + '/' + to_string(fileNum);
-    ofstream outfile(fileName);
+    ofstream outfile(fileName);             //make file for mail -> write content to file
     outfile << "Sender: " << sender << endl;
     outfile << "Subject: " << subject << endl;
     outfile << "Content: " << endl << contentFull;
@@ -271,9 +270,9 @@ void mailServer::gotList() {
     string user = receiveMess();
     cout << "User to list: " << user << endl;
     string listPlace = poolPlace + '/' + user;
-    highFile = fileNameMax(listPlace);
-    numFiles = fileCount(listPlace);
-    if(highFile == -1 || numFiles == -1) {
+    highFile = fileNameMax(listPlace);  //number of latest mail
+    numFiles = fileCount(listPlace);    //number of files in folder
+    if(highFile == -1 || numFiles == -1) {  //unable to get highFile/numFiles
         cerr << "Warning: Couldn't open user's directory. Maybe it doesn't exist?" << endl;
         numFiles = 0;
     }

@@ -15,13 +15,13 @@ void usage() {      //correct input usage
 
 
 
-int main(int argc, char* argv[]) {
+int main(int argc, char* argv[]) {  //below is regex for valid IP address (apparently this noticably slows down make)
     regex valID ("(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\\.(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\\.(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\\.(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])");
     int port;
     string IP(argv[2]);
     bool running = true;
 
-    if(argc != 3) {     //too much information
+    if(argc != 3) {     //wrong number of arguments
         cerr << "ERROR: Incorrect number of arguments" << endl;
         usage();
         exit(1);
@@ -39,7 +39,7 @@ int main(int argc, char* argv[]) {
         usage();
         exit(1);
     }
-    string IpAdr(argv[2]);                        //TO DO: move elsewhere
+    string IpAdr(argv[2]);
 
     client* liege = new client (port, IpAdr);
     try {

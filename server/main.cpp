@@ -79,7 +79,12 @@ int main(int argc, char* argv[]) {
             }   
         }
         catch (int e) {
-            cerr << "Warning: Connection to client lost. Error #" << errno << endl;
+            if(e==1) {
+                cerr << "ERROR: Unexpected connection error. Error #" << errno << endl;
+            }
+            else if(e==2) {
+                cerr << "Warning: Connection to client lost. Error #" << errno << endl;
+            }
         }
     }
 
