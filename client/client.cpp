@@ -110,6 +110,7 @@ string client::receiveMess() {
         throw 1;
     }
     else if(len == 0) {
+        cout << "test" << endl;
         throw 2;
     }
     else {
@@ -278,11 +279,16 @@ void client::execRead(){
     while(prog==0){ //input username //TODO error handling missing
         cout <<  "[READ] Username (max 8 chars): ";
         getline(cin, outLine);
-        if(sendMess(outLine) == 0 ){
-            prog++;
+        if(outLine.length()<= 8){
+            if(sendMess(outLine) == 0 ){
+                prog++;
+            }
+            else {
+                cerr << "ERROR: Failed to send message" << endl;
+            }
         }
         else {
-            cerr << "ERROR: Failed to send message" << endl;
+            cout << "[READ] Too Long..." << endl;
         }
     }
 
@@ -319,18 +325,42 @@ void client::execRead(){
 
 void client::execDel(){
     string outLine, inLine;
+    int prog = 0;
+    int messNum;
 
-    while(true){ //input username //TODO error handling missing
+    while(prog==0){ //input username //TODO error handling missing
         cout <<  "[DEL] Username (max 8 chars): "<< endl;
         getline(cin, outLine);
-        if(sendMess(outLine) == 0 ){
-            break;
+        if(outLine.length()<= 8){
+            if(sendMess(outLine) == 0 ){
+                prog++;
+            }
+            else {
+                cerr << "ERROR: Failed to send message" << endl;
+            }
         }
-    
+        else {
+            cout << "[DEL] Too Long..." << endl;
+        }
     }
-    cout <<  "Input Message Number: "<< endl;
-    getline(cin, outLine);
-    sendMess(outLine);
+
+    while(prog==1) {
+        cout <<  "[DEL] Input Message Number: ";
+        getline(cin, outLine);
+        stringstream s(outLine);
+        s >> messNum;
+        if(messNum<=0) {
+            cerr << "ERROR: Message number must be an integer greater than 0" << endl;
+        }
+        else {
+            if(sendMess(outLine) == 0) {
+                prog++;
+            }
+            else {
+                cerr << "ERROR: Failed to send message" << endl;
+            }
+        }
+    }
 
     inLine = receiveMess();
     cout << inLine << endl;

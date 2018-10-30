@@ -154,7 +154,7 @@ int mailServer::sendMess(string outLine) {     //actually sends the message
         return 1;
     }
     else {
-        cout << "Message sent" << endl;
+        //cout << "Message sent" << endl;
         return 0;
     }
 }
@@ -330,6 +330,7 @@ void mailServer::gotRead() {
 void mailServer::gotDel() {
     DIR *dp;
     struct dirent *dirp;
+    bool fileFound = false;
 
     string user = receiveMess();
     cout << "User that wants to delete file: " << user << endl;
@@ -339,6 +340,7 @@ void mailServer::gotDel() {
 
     if((dp = opendir(delPlace.c_str())) == NULL) {
         cerr << "ERROR: Failed to open mail pool directory" << endl;
+        sendMess("ERR\n");
         return;
     }
 
@@ -346,6 +348,7 @@ void mailServer::gotDel() {
     while ((dirp = readdir(dp)) != NULL) {
         fname = dirp->d_name;
         if(fname == exterm) {
+            fileFound = true;
             string temp = delPlace + '/' + exterm;
             if(remove(temp.c_str()) != 0) {
                 cerr << "ERROR: Failed to delete file" << endl;
@@ -356,6 +359,10 @@ void mailServer::gotDel() {
                 sendMess("OK\n");
             }
         }
+    }
+    if(fileFound == false) {
+        cerr << "ERROR: File not found" << endl;
+        sendMess("ERR\n");
     }
     closedir(dp);
 }
