@@ -349,10 +349,11 @@ void mailServer::gotDel() {
             string temp = delPlace + '/' + exterm;
             if(remove(temp.c_str()) != 0) {
                 cerr << "ERROR: Failed to delete file" << endl;
-                //Schick ERR an client
+                sendMess("ERR\n");
             }
             else {
                 cout << "File " << exterm << " successfully removed" << endl;
+                sendMess("OK\n");
             }
         }
     }

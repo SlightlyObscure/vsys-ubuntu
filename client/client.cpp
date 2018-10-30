@@ -318,24 +318,22 @@ void client::execRead(){
 
 
 void client::execDel(){
-    string outLine;
+    string outLine, inLine;
 
     while(true){ //input username //TODO error handling missing
         cout <<  "[DEL] Username (max 8 chars): "<< endl;
         getline(cin, outLine);
         if(sendMess(outLine) == 0 ){
-        break;
+            break;
         }
     
     }
+    cout <<  "Input Message Number: "<< endl;
+    getline(cin, outLine);
+    sendMess(outLine);
 
-  
-        cout <<  "Input Message Number: "<< endl;
-        getline(cin, outLine);
-        sendMess(outLine);
-
-        //successfull delete: receive OK from server
-        // if error : ERR
+    inLine = receiveMess();
+    cout << inLine << endl;
 
 }
 
