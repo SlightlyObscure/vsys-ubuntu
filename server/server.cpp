@@ -176,19 +176,19 @@ string mailServer::receiveMess() {
 }
 
 int mailServer::handleMess(string mess) {   //reaction to command sent by client
-    if (mess == "SEND") {
+    if (mess == "SEND" || mess == "send") {
         cout << "SEND command received" << endl;
         gotSend();
     }
-    else if (mess == "LIST") {
+    else if (mess == "LIST" || mess == "list") {
         cout << "LIST command received" << endl;
         gotList();
     }
-    else if (mess == "READ") {
+    else if (mess == "READ" || mess == "read") {
         cout << "READ command received" << endl;
         gotRead();
     }
-    else if (mess == "DEL") {
+    else if (mess == "DEL" || mess == "del") {
         cout << "DEL command received" << endl;
         gotDel();
     }
@@ -202,7 +202,7 @@ void mailServer::gotSend() {       //TO DO: split into smaller functions
     string contentPart = "";
     string contentFull;
     string fileName = "";
-    int fileNum = 0;
+    int fileNum = 1;
     DIR *dp;
     struct dirent *dirp;
     bool recEx = false;
