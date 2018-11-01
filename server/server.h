@@ -25,6 +25,7 @@ public:
     mailServer(int port, string pool, string block);
     ~mailServer();
     bool bouncer(string IPad);
+    void scribe(string IPad);
     bool acceptance();
     int sendMess(string outLine);
     string receiveMess();

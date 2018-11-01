@@ -51,7 +51,7 @@ int main(int argc, char* argv[]) {  //below is regex for valid IP address (appar
                     cout << "Client quitting..." << endl;
                 }
                 else if(fault == 2) {
-                    cerr << "ERROR: IP address rejected by server due to too many login attempts. Wait a few minutes for more attempts" << endl;
+                    cerr << "ERROR: IP address rejected by server. This may be due to too many login attempts or a server error. Wait a few minutes for more login attempts" << endl;
                 }
             }
         }

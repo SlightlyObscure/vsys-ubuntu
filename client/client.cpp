@@ -227,6 +227,8 @@ int client::execLogin(){
     if(inLine == "OK") {
         username = tempUse;
     }
+
+    return 0;
 }
 
 void client::execSend(){ // sending the right information with the right amount of characters

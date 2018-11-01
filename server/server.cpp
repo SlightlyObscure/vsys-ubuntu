@@ -157,7 +157,7 @@ int mailServer::sendMess(string outLine) {     //actually sends the message
     }
     else {
         //cout << "Message sent" << endl;
-        cout << "Sent: " << outLine;
+        //cout << "Sent: " << outLine;
         return 0;
     }
 }
@@ -214,13 +214,67 @@ int mailServer::handleMess(string mess) {   //reaction to command sent by client
     }
 }
 
-bool mailServer::bouncer(string IPad) {
-    //TO DO: block after 3 failed logins for x seconds
-    return true;
+void mailServer::scribe(string IPad) {
+    string searchName, fileName;
+    bool foundThing = false;
+    DIR *dp;
+    struct dirent *dirp;
+
+    if((dp = opendir(blockEntry.c_str())) == NULL) { //try to open blocked IP directory
+        cerr << "ERROR: Failed to open blocked IP directory" << endl;
+        return;
+    }
+
+    while ((dirp = readdir(dp)) != NULL) {  //look for file with IPad as name
+        searchName = dirp->d_name;
+        if(searchName == IPad) {
+            foundThing = true;
+        }
+    }
+    closedir(dp);
+
+    if(foundThing) {
+        //TO DO: edit file
+    }
+    else {
+        fileName = blockEntry + '/' + IPad;
+        ofstream outfile(fileName);
+        outfile << "1" << endl;
+        outfile.close();
+    }
+}
+
+bool mailServer::bouncer(string IPad) {         //TO DO: block after 3 failed logins for x seconds
+    string searchName;
+    bool foundThing = false;
+    DIR *dp;
+    struct dirent *dirp;
+
+    if((dp = opendir(blockEntry.c_str())) == NULL) { //try to open blocked IP directory
+        cerr << "ERROR: Failed to open blocked IP directory" << endl;
+        return false;
+    }
+
+    while ((dirp = readdir(dp)) != NULL) {  //look for file with IPad as name
+        searchName = dirp->d_name;
+        if(searchName == IPad) {
+            foundThing = true;
+        }
+    }
+    closedir(dp);
+
+    if(foundThing) {
+        return false;   //TO DO: check file content
+    }
+    else {
+       return true; 
+    }
+
+    //return true;
 }
 
 void mailServer::gotLogin() {
-    string IPad = inet_ntoa(address.sin_addr); //TO DO: check IP address
+    string IPad = inet_ntoa(address.sin_addr);
     if(bouncer(IPad)) {
         sendMess("OK\n");
     }
@@ -238,7 +292,8 @@ void mailServer::gotLogin() {
         sendMess("OK\n");
     }
     else {
-        sendMess("ERR\n");
+        sendMess("ERR\n");      //TO DO: write into blacklist
+        //scribe(IPad);
     }
 
 }
