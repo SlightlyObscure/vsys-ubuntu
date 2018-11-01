@@ -17,6 +17,7 @@
 #include "server.h"
 
 #define BUFFER_LENGTH 1024   //maximum number of characters that can be received at once
+#define SHALL_NOT_PASTIME 30    //time an IP address is blocked after 3 failed login attempts
 
 using namespace std;
 
@@ -59,6 +60,16 @@ ssize_t readline (int fd, void *vptr, size_t maxlen) { // Returns read buffer un
 	*ptr = 0 ;                   // null terminate 
 	return (n) ; 
 } 
+
+unsigned int getTime() {
+    unsigned int iNow;
+
+    time_t now = time(0);
+    now -= 1541000000;
+    iNow = static_cast<unsigned int>(now);
+
+    return iNow;
+}
 
 int fileNameMax(string path) { //returns the name of the mail file with the largest number as its name
     DIR *dp;
@@ -239,7 +250,6 @@ void mailServer::scribe(string IPad) {
         if (readFile.is_open()) {
             while (!readFile.eof()) {
                 readFile >> line;
-                cout << line;
             }
         }
         else {
@@ -251,7 +261,9 @@ void mailServer::scribe(string IPad) {
             writeFile << "2" << endl;
         }
         else {
-            writeFile << "<time>" << endl;
+            unsigned int now = getTime();
+            now += SHALL_NOT_PASTIME;
+            writeFile << ":" << now << endl;
         }
         writeFile.close();
     }
@@ -264,6 +276,7 @@ void mailServer::scribe(string IPad) {
 
 bool mailServer::bouncer(string IPad) {         //TO DO: block after 3 failed logins for x seconds
     string searchName, fileName, line;
+    unsigned int time, fileTime;
     bool foundThing = false;
     DIR *dp;
     struct dirent *dirp;
@@ -287,11 +300,22 @@ bool mailServer::bouncer(string IPad) {         //TO DO: block after 3 failed lo
         if (readFile.is_open()) {
             while (!readFile.eof()) {
                 readFile >> line;
-                cout << line;
             }
         }
         readFile.close();
-        if(line == "1" || line == "2" || line == "3") { //TO DO: compare timestamp with system time
+        if(line == "1" || line == "2") { //TO DO: compare timestamp with system time
+            return true;
+        }
+        time = getTime();
+        string newLine = line.substr(1);
+        stringstream s(newLine);
+        s >> fileTime;
+        cout << time << endl;
+        cout << fileTime << endl;
+        if(time >= fileTime){
+            if(remove(fileName.c_str()) != 0) {
+                cerr << "ERROR: Failed to delete black list file" << endl;
+            }
             return true;
         }
         else {

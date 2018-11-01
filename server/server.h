@@ -9,6 +9,7 @@ using namespace std;
 
 ssize_t readline (int fd, void *vptr, size_t maxlen);
 static ssize_t my_read (int fd, char *ptr);
+unsigned int getTime();
 
 class mailServer {
 private:
