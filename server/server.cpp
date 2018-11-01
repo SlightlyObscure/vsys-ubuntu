@@ -215,7 +215,7 @@ int mailServer::handleMess(string mess) {   //reaction to command sent by client
 }
 
 void mailServer::scribe(string IPad) {
-    string searchName, fileName;
+    string searchName, fileName, line;
     bool foundThing = false;
     DIR *dp;
     struct dirent *dirp;
@@ -233,19 +233,37 @@ void mailServer::scribe(string IPad) {
     }
     closedir(dp);
 
+    fileName = blockEntry + '/' + IPad;
     if(foundThing) {
-        //TO DO: edit file
+        ifstream readFile(fileName);
+        if (readFile.is_open()) {
+            while (!readFile.eof()) {
+                readFile >> line;
+                cout << line;
+            }
+        }
+        else {
+            cerr << "ERROR: Failed to open IP Blacklist file" << endl;
+        }
+        readFile.close();
+        ofstream writeFile(fileName);
+        if(line == "1") {
+            writeFile << "2" << endl;
+        }
+        else {
+            writeFile << "<time>" << endl;
+        }
+        writeFile.close();
     }
     else {
-        fileName = blockEntry + '/' + IPad;
-        ofstream outfile(fileName);
-        outfile << "1" << endl;
-        outfile.close();
+        ofstream writeFile(fileName);
+        writeFile << "1" << endl;
+        writeFile.close();
     }
 }
 
 bool mailServer::bouncer(string IPad) {         //TO DO: block after 3 failed logins for x seconds
-    string searchName;
+    string searchName, fileName, line;
     bool foundThing = false;
     DIR *dp;
     struct dirent *dirp;
@@ -263,8 +281,22 @@ bool mailServer::bouncer(string IPad) {         //TO DO: block after 3 failed lo
     }
     closedir(dp);
 
+    fileName = blockEntry + '/' + IPad;
     if(foundThing) {
-        return false;   //TO DO: check file content
+        ifstream readFile(fileName);
+        if (readFile.is_open()) {
+            while (!readFile.eof()) {
+                readFile >> line;
+                cout << line;
+            }
+        }
+        readFile.close();
+        if(line == "1" || line == "2" || line == "3") { //TO DO: compare timestamp with system time
+            return true;
+        }
+        else {
+            return false;
+        }
     }
     else {
        return true; 
@@ -293,7 +325,7 @@ void mailServer::gotLogin() {
     }
     else {
         sendMess("ERR\n");      //TO DO: write into blacklist
-        //scribe(IPad);
+        scribe(IPad);
     }
 
 }
