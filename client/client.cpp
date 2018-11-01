@@ -58,6 +58,7 @@ ssize_t readline (int fd, void *vptr, size_t maxlen) { // Returns read buffer un
 } 
 
 client::client(int port, string IpAdr) {
+    string inLine;
     this->port = port;
 
     cout << "Establishing Client..." << endl; 
@@ -128,37 +129,105 @@ int client::communicate() {
     if(outLine == "QUIT" || outLine == "quit") {    //quitting out of connection
         return 1;
     }
-    
-    if(outLine == "SEND" || outLine == "send" ){    //each valid command leads to a different function; once completed the loop in main.cpp returns to here
-        if(sendMess(outLine) == 1) {
-            return 2;
+    else if (username == "") {
+        if(outLine == "LOGIN" || outLine == "login" ){    //if a successful login hasn't happened only LOGIN and QUIT are valid
+            if(sendMess(outLine) == 1) {
+                cerr << "LOGIN command unsuccessful" << endl;
+            }
+            else if(execLogin()!=0) {
+                return 2;
+            }
         }
-        execSend(); 
-    } else if(outLine == "LIST" || outLine == "list" ) {
-        if(sendMess(outLine) == 1) {
-            return 2;
-        };
-        execList();
-    } else if (outLine == "READ" || outLine == "read" ) {
-        if(sendMess(outLine) == 1) {
-            return 2;
+        else {
+            cout << "ERROR: Invalid command" << endl;
+            cout << "Valid Commands until login: LOGIN, QUIT" << endl;
         }
-        execRead();
-    } else if (outLine == "DEL" || outLine == "del" ) {
-        if(sendMess(outLine) == 1) {
-            return 2;
-        }
-        execDel();
     }
     else {
-        cout << "ERROR: Invalid command" << endl;
-        cout << "Known Commands: SEND, LIST, READ, DEL, QUIT" << endl;
+        if(outLine == "SEND" || outLine == "send" ){    //each valid command leads to a different function; once completed the loop in main.cpp returns to here
+            if(sendMess(outLine) == 1) {
+                cerr << "SEND command unsuccessful" << endl;
+            }
+            execSend(); 
+        } 
+        else if(outLine == "LIST" || outLine == "list" ) {
+            if(sendMess(outLine) == 1) {
+                cerr << "LIST command unsuccessful" << endl;
+            };
+            execList();
+        } 
+        else if (outLine == "READ" || outLine == "read" ) {
+            if(sendMess(outLine) == 1) {
+                cerr << "READ command unsuccessful" << endl;
+            }
+            execRead();
+        } 
+        else if (outLine == "DEL" || outLine == "del" ) {
+            if(sendMess(outLine) == 1) {
+                cerr << "DEL command unsuccessful" << endl;
+            }
+            execDel();
+        }
+        else {
+            cout << "ERROR: Invalid command" << endl;
+            cout << "Valid Commands: SEND, LIST, READ, DEL, QUIT" << endl;
+        }
     }
     
     return 0;
 }
 
+int client::execLogin(){
+    string inLine, outLine, tempUse;
+    int prog = 0;
 
+    inLine = receiveMess();  
+    cout << inLine << endl;
+    if(inLine == "ERR") {
+        return 1;
+    }
+
+    //enter username
+    while(prog==0){
+        cout <<  "[LOGIN] LDAP Username (max 8 chars): ";
+        getline(cin, outLine);
+        if(outLine.length()<= 8 && outLine.length()!=0){
+            if(sendMess(outLine) == 0) {
+                tempUse = outLine;
+                prog++;
+            }
+            else {
+                cerr << "ERROR: Failed to send message" << endl;
+            }
+        }
+        else {
+            cout << "[LOGIN] Too Long..." << endl;
+        }
+    }
+
+    while(prog==1){
+        cout <<  "[LOGIN] LDAP Password (max 42 chars): ";
+        getline(cin, outLine);
+        if(outLine.length()<= 42 && outLine.length()!=0){
+            if(sendMess(outLine) == 0) {
+                prog++;
+            }
+            else {
+                cerr << "ERROR: Failed to send message" << endl;
+            }
+        }
+        else {
+            cout << "[LOGIN] Too Long..." << endl;
+        }
+    }
+
+    //receive OK or ERR from server
+    inLine = receiveMess();  
+    cout << inLine << endl;
+    if(inLine == "OK") {
+        username = tempUse;
+    }
+}
 
 void client::execSend(){ // sending the right information with the right amount of characters
     string outLine;
@@ -167,7 +236,7 @@ void client::execSend(){ // sending the right information with the right amount 
     //checking every input with a loop, until they get it right!!
 
     //sending sender
-    while(prog==0){
+    /*while(prog==0){
         cout <<  "[SEND] Sender (max 8 chars): ";
         getline(cin, outLine);
         if(outLine.length()<= 8 && outLine.length()!=0){
@@ -181,10 +250,10 @@ void client::execSend(){ // sending the right information with the right amount 
         else {
             cout << "[SEND] Too Long..." << endl;   //entered string was too long
         }
-    }
+    }*/
 
     //sending recipient
-    while(prog==1){
+    while(prog==0){
         cout << "[SEND] Recipient (max 8 chars): "; 
         getline(cin, outLine);                          
         if(outLine.length()<= 8 && outLine.length()!=0){
@@ -201,7 +270,7 @@ void client::execSend(){ // sending the right information with the right amount 
     }
 
     //sending subject
-    while(prog==2){
+    while(prog==1){
         cout << "[SEND] Subject (max 80 chars): ";
         getline(cin, outLine);
         if(outLine.length()<= 80 && outLine.length()!=0){
@@ -219,7 +288,7 @@ void client::execSend(){ // sending the right information with the right amount 
 
     //sending message content
     cout << "[SEND] Message Content (no limit; send with input '.\\n'): " << endl;
-    while(prog==3){
+    while(prog==2){
         getline(cin, outLine);
         if(outLine.length()!=0){
             if(sendMess(outLine) != 0){
@@ -241,10 +310,10 @@ void client::execList(){
     string outLine, inLine;
 
     //enter username
-    while(true){
+    /*while(true){
         cout <<  "[LIST] Username (max 8 chars): ";
         getline(cin, outLine);
-        if(outLine.length()<= 8){
+        if(outLine.length()<= 8 && outLine.length()!=0){
             if(sendMess(outLine) == 0) {
                 break;
             }
@@ -255,7 +324,7 @@ void client::execList(){
         else {
             cout << "[LIST] Too Long..." << endl;
         }
-    }
+    }*/
     
     //print list
     while(inLine!=".") {        //read from socket until server sends "."
@@ -273,10 +342,10 @@ void client::execRead(){
     int messNum;
 
     //input username
-    while(prog==0){ 
+    /*while(prog==0){ 
         cout <<  "[READ] Username (max 8 chars): ";
         getline(cin, outLine);
-        if(outLine.length()<= 8){
+        if(outLine.length()<= 8 && outLine.length()!=0){
             if(sendMess(outLine) == 0 ){
                 prog++;
             }
@@ -287,10 +356,10 @@ void client::execRead(){
         else {
             cout << "[READ] Too Long..." << endl;
         }
-    }
+    }*/
 
     //input number of the message; numbers are displayed via LIST
-    while(prog==1) {
+    while(prog==0) {
         cout <<  "[READ] Input Message Number: ";
         getline(cin, outLine);
         stringstream s(outLine);
@@ -329,10 +398,10 @@ void client::execDel(){
     int messNum;
 
     //input username
-    while(prog==0){
+    /*while(prog==0){
         cout <<  "[DEL] Username (max 8 chars): "<< endl;
         getline(cin, outLine);
-        if(outLine.length()<= 8){
+        if(outLine.length()<= 8 && outLine.length()!=0){
             if(sendMess(outLine) == 0 ){
                 prog++;
             }
@@ -343,10 +412,10 @@ void client::execDel(){
         else {
             cout << "[DEL] Too Long..." << endl;
         }
-    }
+    }*/
 
     //input number of the message; numbers are displayed via LIST
-    while(prog==1) {
+    while(prog==0) {
         cout <<  "[DEL] Input Message Number: ";
         getline(cin, outLine);
         stringstream s(outLine);

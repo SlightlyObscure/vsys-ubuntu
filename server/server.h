@@ -13,21 +13,26 @@ static ssize_t my_read (int fd, char *ptr);
 class mailServer {
 private:
     string poolPlace;
+    string blockEntry;
     int port;
     int socketNum;
     int clientSocket;
     struct sockaddr_in address;
     socklen_t socketLength;
+    string username = "";
 
 public:
-    mailServer(int port, string pool);
+    mailServer(int port, string pool, string block);
     ~mailServer();
+    bool bouncer(string IPad);
     bool acceptance();
     int sendMess(string outLine);
     string receiveMess();
     int handleMess(string mess);
+    void gotLogin();
     void gotSend();
     void gotList();
     void gotRead();
     void gotDel();
+    void setUsername(string name);
 };

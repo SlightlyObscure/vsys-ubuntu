@@ -100,9 +100,10 @@ int fileCount(string path) { //returns number of files in a folder
 
 }
 
-mailServer::mailServer(int port, string pool) {
+mailServer::mailServer(int port, string pool, string block) {
     this->port = port;
     this->poolPlace = pool;
+    this->blockEntry = block;
 
     cout << "Constructing server..." << endl; 
 
@@ -139,6 +140,8 @@ bool mailServer::acceptance() {                                      //TO DO: ma
     if(accSockNum > 0) {
         cout << "Client accepted with socket descriptor: " << accSockNum << endl;
         clientSocket = accSockNum;
+        string IPad = inet_ntoa(address.sin_addr);
+        cout << "Connection accepted: " << IPad << endl;
     }
     else {
         cerr << "Client cast out (failed to accept client)" << endl;
@@ -154,6 +157,7 @@ int mailServer::sendMess(string outLine) {     //actually sends the message
     }
     else {
         //cout << "Message sent" << endl;
+        cout << "Sent: " << outLine;
         return 0;
     }
 }
@@ -176,26 +180,67 @@ string mailServer::receiveMess() {
 }
 
 int mailServer::handleMess(string mess) {   //reaction to command sent by client
-    if (mess == "SEND" || mess == "send") {
-        cout << "SEND command received" << endl;
-        gotSend();
-    }
-    else if (mess == "LIST" || mess == "list") {
-        cout << "LIST command received" << endl;
-        gotList();
-    }
-    else if (mess == "READ" || mess == "read") {
-        cout << "READ command received" << endl;
-        gotRead();
-    }
-    else if (mess == "DEL" || mess == "del") {
-        cout << "DEL command received" << endl;
-        gotDel();
+    if(username == "") {
+        if (mess == "LOGIN" || mess == "login") {
+            cout << "LOGIN command received" << endl;
+            gotLogin();
+        }
+        else {
+            cerr << "ERROR: Invalid command received. Only LOGIN and QUIT commands are valid before login" << endl;
+            return 2;
+        }
     }
     else {
-        return 1;
+        if (mess == "SEND" || mess == "send") {
+            cout << "SEND command received" << endl;
+            gotSend();
+        }
+        else if (mess == "LIST" || mess == "list") {
+            cout << "LIST command received" << endl;
+            gotList();
+        }
+        else if (mess == "READ" || mess == "read") {
+            cout << "READ command received" << endl;
+            gotRead();
+        }
+        else if (mess == "DEL" || mess == "del") {
+            cout << "DEL command received" << endl;
+            gotDel();
+        }
+        else {
+            cerr << "ERROR: Invalid command received" << endl;
+            return 1;
+        }
     }
-    
+}
+
+bool mailServer::bouncer(string IPad) {
+    //TO DO: block after 3 failed logins for x seconds
+    return true;
+}
+
+void mailServer::gotLogin() {
+    string IPad = inet_ntoa(address.sin_addr); //TO DO: check IP address
+    if(bouncer(IPad)) {
+        sendMess("OK\n");
+    }
+    else {
+        sendMess("ERR\n");
+    }
+
+    string entUser = receiveMess(); //receive username
+    cout << "Username (max 8 chars): " << entUser << endl;
+    string entPass = receiveMess();
+    cout << "Password (max 42 chars): " << entPass << endl;
+
+    if (entPass == "friend") {  //TO DO: LDAP
+        username = entUser;
+        sendMess("OK\n");
+    }
+    else {
+        sendMess("ERR\n");
+    }
+
 }
 
 void mailServer::gotSend() {       //TO DO: split into smaller functions
@@ -207,7 +252,9 @@ void mailServer::gotSend() {       //TO DO: split into smaller functions
     struct dirent *dirp;
     bool recEx = false;
 
-    string sender = receiveMess();  //receive sender
+    //string sender = receiveMess();  //receive sender
+    string sender = username;
+
     cout << "Sender (max 8 chars): " << sender << endl;
     string recipient = receiveMess();   //receive recipient
     cout << "Recipient (max 8 chars): " << recipient << endl;
@@ -267,7 +314,9 @@ void mailServer::gotList() {
     int highFile, numFiles;
     string line;
 
-    string user = receiveMess();
+    //string user = receiveMess();
+    string user = username;
+
     cout << "User to list: " << user << endl;
     string listPlace = poolPlace + '/' + user;
     highFile = fileNameMax(listPlace);  //number of latest mail
@@ -301,7 +350,9 @@ void mailServer::gotRead() {
     string line;
     bool subsequent = false;
 
-    string user = receiveMess();
+    //string user = receiveMess();
+    string user = username;
+
     cout << "User that wants to read file: " << user << endl;
     string readNum = receiveMess();
     cout << "File to read: " << readNum << endl;
@@ -313,13 +364,16 @@ void mailServer::gotRead() {
             subsequent = true;
             sendMess("OK\n");
         }
-        cout << line << endl;                               //!!! output to client
+        cout << line << endl;
         sendMess(line+ '\n');
     }
     if(subsequent == false) {
         sendMess("ERR\n");
     }
-    sendMess(".\n");
+    else {
+        sendMess(".\n");
+    }
+    
     
     //Der Server antwortet bei korrekten Parametern mit OK
     //Komplettes file wird an client geschickt
@@ -331,7 +385,9 @@ void mailServer::gotDel() {
     struct dirent *dirp;
     bool fileFound = false;
 
-    string user = receiveMess();
+    //string user = receiveMess();
+    string user = username;
+    
     cout << "User that wants to delete file: " << user << endl;
     string exterm = receiveMess();
     cout << "File to be deleted: " << exterm << endl;
@@ -364,4 +420,8 @@ void mailServer::gotDel() {
         sendMess("ERR\n");
     }
     closedir(dp);
+}
+
+void mailServer::setUsername(string name) {
+    username = name;
 }

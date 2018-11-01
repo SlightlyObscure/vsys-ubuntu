@@ -10,7 +10,7 @@
 using namespace std;
 
 void usage() {
-    cout << "Correct Usage: ./server <port number> <path of mailspool directory>" << endl;
+    cout << "Correct Usage: ./server <port number> <path of mailspool directory> <path of blocked IP directory>" << endl;
     return;
 }
 
@@ -18,8 +18,9 @@ void usage() {
 int main(int argc, char* argv[]) {
     int port;                        //port of server
     string poolPlace(argv[2]);      //directory of mailspool
+    string blockEntry(argv[3]);     //directory for blocked IPs
 
-    if(argc != 3) {
+    if(argc != 4) {
         cerr << "ERROR: Incorrect number of arguments" << endl;
         usage();
         exit(1);
@@ -37,8 +38,13 @@ int main(int argc, char* argv[]) {
         usage();
         exit(1);
     }
+    else if(opendir(argv[3]) == NULL) {                                    
+        cerr << "ERROR: Invalid path of blocked IP directory" << endl;
+        usage();
+        exit(1);
+    }
 
-    mailServer* serf = new mailServer (port, poolPlace);
+    mailServer* serf = new mailServer (port, poolPlace, blockEntry);
 
     /*pid_t procID; //process ID
     
@@ -84,6 +90,7 @@ int main(int argc, char* argv[]) {
             }
             else if(e==2) {
                 cerr << "Warning: Connection to client lost. Error #" << errno << endl;
+                serf->setUsername("");
             }
         }
     }

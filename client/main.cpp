@@ -42,10 +42,17 @@ int main(int argc, char* argv[]) {  //below is regex for valid IP address (appar
     string IpAdr(argv[2]);
 
     client* liege = new client (port, IpAdr);
+    int fault;
     try {
         while(running) {
-            if(liege->communicate() != 0) {
-                running = false;                    //TO DO: maybe different handling for different return values?
+            if((fault = liege->communicate()) != 0) {
+                running = false;                    
+                if(fault == 1) {
+                    cout << "Client quitting..." << endl;
+                }
+                else if(fault == 2) {
+                    cerr << "ERROR: IP address rejected by server due to too many login attempts. Wait a few minutes for more attempts" << endl;
+                }
             }
         }
     }

@@ -17,12 +17,14 @@ private:
     int serverSpeekSocket;
     struct sockaddr_in address;
     int port;
+    string username = "";
 public:
     client(int port, string IpAdr);
     ~client();
     int communicate();
     int sendMess(string outLine);
     string receiveMess();
+    int execLogin();
     void execSend();
     void execRead();
     void execList();
