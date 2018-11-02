@@ -349,6 +349,9 @@ void mailServer::gotLogin() {
     if(answer == "ERR\n"){  //TODO ERR und OK als konstante machen
       scribe(IPad); //TO DO: write into blacklist   
     }
+    else {
+        username = entUser;
+    }
 
 
 /*
