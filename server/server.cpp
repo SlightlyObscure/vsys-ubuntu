@@ -15,6 +15,7 @@
 
 
 #include "server.h"
+#include "ldap.h"
 
 #define BUFFER_LENGTH 1024   //maximum number of characters that can be received at once
 #define SHALL_NOT_PASTIME 30    //time an IP address is blocked after 3 failed login attempts
@@ -343,6 +344,14 @@ void mailServer::gotLogin() {
     string entPass = receiveMess();
     cout << "Password (max 42 chars): " << entPass << endl;
 
+    string answer = myLDAP::login(entUser, entPass);
+    sendMess(answer);
+    if(answer == "ERR\n"){  //TODO ERR und OK als konstante machen
+      scribe(IPad); //TO DO: write into blacklist   
+    }
+
+
+/*
     if (entPass == "friend") {  //TO DO: LDAP
         username = entUser;
         sendMess("OK\n");
@@ -351,7 +360,7 @@ void mailServer::gotLogin() {
         sendMess("ERR\n");      //TO DO: write into blacklist
         scribe(IPad);
     }
-
+*/
 }
 
 void mailServer::gotSend() {       //TO DO: split into smaller functions

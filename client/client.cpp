@@ -206,8 +206,10 @@ int client::execLogin(){
     }
 
     while(prog==1){
-        cout <<  "[LOGIN] LDAP Password (max 42 chars): ";
-        getline(cin, outLine);
+        //cout <<  "[LOGIN] LDAP Password (max 42 chars): ";
+        //getline(cin, outLine);
+        //lese passwort ein und konvertier von c_string zu string
+        outLine = string(getpass("[LOGIN] LDAP Password (max 42 chars): "));
         if(outLine.length()<= 42 && outLine.length()!=0){
             if(sendMess(outLine) == 0) {
                 prog++;
